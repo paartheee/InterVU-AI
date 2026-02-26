@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InterVU - AI Mock Interview</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/landing.css">
+</head>
+<body>
+    <!-- Toast notification container -->
+    <div id="toast-container"></div>
+
+    <!-- ============ LANDING PAGE ============ -->
+    <div id="landing-page">
+        <!-- Animated Random Needle Lines Background -->
+        <canvas id="needle-canvas" class="needle-canvas"></canvas>
+        <nav class="landing-nav">
+            <div class="nav-brand">InterVU</div>
+            <div class="nav-links">
+                <a href="#features">Features</a>
+                <a href="#how-it-works">How It Works</a>
+                <button class="nav-cta" onclick="enterApp()">Try Now</button>
+            </div>
+        </nav>
+
+        <!-- Hero -->
+        <section class="hero">
+            <div class="hero-bg-grid"></div>
+            <div class="hero-content">
+                <div class="hero-badge">AI-Powered Mock Interviews</div>
+                <h1>Ace Real Interviews with<br>AI That <span class="gradient-text">Coaches You Live</span></h1>
+                <ul class="hero-bullets">
+                    <li><span class="bullet-icon">&#x1F399;</span> Real-time AI interviewer that listens &amp; responds</li>
+                    <li><span class="bullet-icon">&#x1F440;</span> Voice + body language feedback via webcam</li>
+                    <li><span class="bullet-icon">&#x26A1;</span> Instant improvement tips in 14 languages</li>
+                </ul>
+                <div class="hero-actions">
+                    <button class="btn-primary-lg" onclick="enterApp()">
+                        Start Free Mock Interview
+                        <span class="btn-arrow">&rarr;</span>
+                    </button>
+                    <a href="#how-it-works" class="btn-ghost">Watch 60-sec Demo</a>
+                </div>
+                <p class="hero-trust">No signup required &bull; 5-minute session &bull; 100% free</p>
+                <div class="hero-stats">
+                    <div class="hero-stat">
+                        <span class="hero-stat-icon">&#x1F9E0;</span>
+                        <div>
+                            <span class="hero-stat-value">3</span>
+                            <span class="hero-stat-label">AI Evaluation Modes</span>
+                        </div>
+                    </div>
+                    <div class="hero-stat-divider"></div>
+                    <div class="hero-stat">
+                        <span class="hero-stat-icon">&#x1F30D;</span>
+                        <div>
+                            <span class="hero-stat-value">14</span>
+                            <span class="hero-stat-label">Coaching Languages</span>
+                        </div>
+                    </div>
+                    <div class="hero-stat-divider"></div>
+                    <div class="hero-stat">
+                        <span class="hero-stat-icon">&#x1F4E1;</span>
+                        <div>
+                            <span class="hero-stat-value">Real-time</span>
+                            <span class="hero-stat-label">Voice + Vision AI</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="hero-visual">
+                <div class="hero-mockup">
+                    <div class="mockup-header">
+                        <div class="mockup-dots">
+                            <span></span><span></span><span></span>
+                        </div>
+                        <span class="mockup-title">InterVU — Live Interview</span>
+                        <span class="mockup-timer">02:14 / 05:00</span>
+                    </div>
+                    <div class="mockup-body">
+                        <div class="mockup-video-area">
+                            <!-- Camera view -->
+                            <div class="mockup-cam">
+                                <svg class="mockup-cam-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+                                    <defs>
+                                        <linearGradient id="gemini-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                            <stop offset="0%" style="stop-color:#4285F4;stop-opacity:1"/>
+                                            <stop offset="100%" style="stop-color:#DB4437;stop-opacity:1"/>
+                                        </linearGradient>
+                                        <linearGradient id="sparkle-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                            <stop offset="0%" style="stop-color:#8AB4F8;stop-opacity:1"/>
+                                            <stop offset="100%" style="stop-color:#F28B82;stop-opacity:1"/>
+                                        </linearGradient>
+                                    </defs>
+                                    <path d="M20 20 H70" stroke="#14b8a6" stroke-width="4" stroke-linecap="round"/>
+                                    <path d="M20 20 V70" stroke="#14b8a6" stroke-width="4" stroke-linecap="round"/>
+                                    <path d="M492 20 H442" stroke="#14b8a6" stroke-width="4" stroke-linecap="round"/>
+                                    <path d="M492 20 V70" stroke="#14b8a6" stroke-width="4" stroke-linecap="round"/>
+                                    <path d="M20 492 H70" stroke="#14b8a6" stroke-width="4" stroke-linecap="round"/>
+                                    <path d="M20 492 V442" stroke="#14b8a6" stroke-width="4" stroke-linecap="round"/>
+                                    <path d="M492 492 H442" stroke="#14b8a6" stroke-width="4" stroke-linecap="round"/>
+                                    <path d="M492 492 V442" stroke="#14b8a6" stroke-width="4" stroke-linecap="round"/>
+                                    <circle cx="56" cy="46" r="8" fill="#ef4444">
+                                        <animate attributeName="opacity" values="1;0.3;1" dur="2s" repeatCount="indefinite"/>
+                                    </circle>
+                                    <text x="72" y="52" fill="#ef4444" font-size="22" font-weight="700" font-family="sans-serif">REC</text>
+                                    <g id="human-figure">
+                                        <path d="M120,460 L120,400 C120,340 160,310 210,310 C260,310 300,340 300,400 L300,460 Z" fill="#22c55e"/>
+                                        <circle cx="210" cy="230" r="60" fill="#76db87"/>
+                                    </g>
+                                    <g id="interaction-bubble">
+                                        <path d="M240,80 L440,80 C462.09,80 480,97.91 480,120 L480,260 C480,282.09 462.09,300 440,300 L320,300 L260,360 L260,300 L240,300 C217.91,300 200,282.09 200,260 L200,120 C200,97.91 217.91,80 240,80 Z" fill="#FFFFFF" stroke="#E8EAED" stroke-width="8" transform="translate(14, -81) scale(0.6)" style="transform-box: fill-box; transform-origin: center center;"/>
+                                        <g transform="translate(260, 130) scale(0.8)">
+                                            <path d="M100,0 C100,55.23 144.77,100 200,100 C144.77,100 100,144.77 100,200 C100,144.77 55.23,100 0,100 C55.23,100 100,55.23 100,0 Z" fill="url(#gemini-gradient)" transform="translate(16, -105) scale(0.7)" style="transform-box: fill-box; transform-origin: center center;">
+                                                <animateTransform attributeName="transform" type="translate" values="0,0; 0,-10; 0,0" dur="2s" repeatCount="indefinite" calcMode="spline" keySplines="0.4 0 0.2 1; 0.4 0 0.2 1" additive="sum"/>
+                                            </path>
+                                            <path d="M180,20 C180,42.09 197.91,60 220,60 C197.91,60 180,77.91 180,100 C180,77.91 162.09,60 140,60 C162.09,60 180,42.09 180,20 Z" fill="url(#sparkle-gradient)" opacity="0.9" transform="translate(-8, -122) scale(0.6)" style="transform-box: fill-box; transform-origin: center center;">
+                                                <animateTransform attributeName="transform" type="translate" values="0,0; 0,-10; 0,0" dur="2s" repeatCount="indefinite" calcMode="spline" keySplines="0.4 0 0.2 1; 0.4 0 0.2 1" additive="sum"/>
+                                            </path>
+                                        </g>
+                                    </g>
+                                    <g stroke="#BDC1C6" stroke-width="6" stroke-linecap="round" transform="translate(63, -9)">
+                                        <line x1="220" y1="260" x2="240" y2="260"/>
+                                        <line x1="215" y1="240" x2="235" y2="240"/>
+                                    </g>
+                                </svg>
+                            </div>
+                            <!-- Side panel: live analysis -->
+                            <div class="mockup-analysis">
+                                <div class="analysis-indicator">
+                                    <span class="live-dot"></span> Live Analysis
+                                </div>
+                                <div class="confidence-meter">
+                                    <span class="meter-label">Confidence</span>
+                                    <div class="meter-bar"><div class="meter-fill" style="width: 62%"></div></div>
+                                    <span class="meter-value">62%</span>
+                                </div>
+                                <div class="confidence-meter">
+                                    <span class="meter-label">Eye Contact</span>
+                                    <div class="meter-bar"><div class="meter-fill meter-warn" style="width: 38%"></div></div>
+                                    <span class="meter-value meter-warn-text">38%</span>
+                                </div>
+                                <div class="confidence-meter">
+                                    <span class="meter-label">Clarity</span>
+                                    <div class="meter-bar"><div class="meter-fill" style="width: 71%"></div></div>
+                                    <span class="meter-value">71%</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mockup-transcript">
+                            <div class="mockup-msg ai">
+                                <strong>Wayne:</strong> Your resume says you led a team of 8. Tell me about handling an underperformer.
+                            </div>
+                            <div class="mockup-msg candidate">
+                                <strong>You:</strong> Yeah, so there was this one guy who wasn't really doing much—
+                            </div>
+                            <div class="mockup-msg ai interrupt">
+                                <strong>Wayne:</strong> Pause — you're fidgeting. Give me the situation, action, and measurable outcome.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features -->
+        <section id="features" class="features-section">
+            <div class="section-container">
+                <div class="section-header">
+                    <span class="section-tag">Features</span>
+                    <h2>Train Like It's a Real Interview —<br><span class="gradient-text">Improve Faster With AI</span></h2>
+                    <p>Practice, get interrupted, receive feedback, and fix mistakes in real time.</p>
+                </div>
+
+                <!-- 3-State AI Brain — Full-width hero feature -->
+                <div class="feature-brain">
+                    <div class="brain-header">
+                        <span class="brain-icon">&#x1F9E0;</span>
+                        <h3>3-State Adaptive AI Brain</h3>
+                        <p>Wayne doesn't follow a script. He reads you in real time and shifts strategy.</p>
+                    </div>
+                    <div class="brain-states">
+                        <div class="brain-state brain-state-active" data-state="interrogation">
+                            <div class="brain-state-dot state-dot-red"></div>
+                            <div class="brain-state-info">
+                                <strong>Interrogation</strong>
+                                <span>Deep technical probing on your resume claims</span>
+                            </div>
+                        </div>
+                        <div class="brain-state-arrow">&rarr;</div>
+                        <div class="brain-state" data-state="visual">
+                            <div class="brain-state-dot state-dot-yellow"></div>
+                            <div class="brain-state-info">
+                                <strong>Visual Evaluation</strong>
+                                <span>Body language, confidence &amp; eye contact scoring</span>
+                            </div>
+                        </div>
+                        <div class="brain-state-arrow">&rarr;</div>
+                        <div class="brain-state" data-state="coaching">
+                            <div class="brain-state-dot state-dot-green"></div>
+                            <div class="brain-state-info">
+                                <strong>Coaching Mode</strong>
+                                <span>Real-time tips to fix weak points instantly</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hero features — 2 large cards -->
+                <div class="features-hero-grid">
+                    <div class="feature-card feature-hero-card">
+                        <div class="feature-card-icon-row">
+                            <span class="feature-icon-lg">&#x1F441;</span>
+                            <span class="feature-live-badge"><span class="live-dot-sm"></span> Live</span>
+                        </div>
+                        <h3>Real-Time Vision</h3>
+                        <p>Tracks eye contact, posture, confidence, and focus — alerts you the moment you lose interviewer presence.</p>
+                        <div class="feature-metrics">
+                            <div class="feature-metric"><span class="metric-dot metric-green"></span> Eye contact</div>
+                            <div class="feature-metric"><span class="metric-dot metric-yellow"></span> Posture</div>
+                            <div class="feature-metric"><span class="metric-dot metric-green"></span> Confidence</div>
+                        </div>
+                    </div>
+                    <div class="feature-card feature-hero-card">
+                        <div class="feature-card-icon-row">
+                            <span class="feature-icon-lg">&#x270B;</span>
+                        </div>
+                        <h3>Smart Interruptions</h3>
+                        <p>Cuts you mid-answer when you're vague, off-topic, or losing confidence — exactly like a tough real interviewer.</p>
+                        <div class="feature-waveform">
+                            <div class="wave-bar" style="height: 12px"></div>
+                            <div class="wave-bar" style="height: 20px"></div>
+                            <div class="wave-bar" style="height: 28px"></div>
+                            <div class="wave-bar" style="height: 16px"></div>
+                            <div class="wave-bar" style="height: 8px"></div>
+                            <div class="wave-bar wave-bar-cut" style="height: 4px"></div>
+                            <div class="wave-bar wave-bar-cut" style="height: 2px"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Secondary features — smaller grid -->
+                <div class="features-secondary-grid">
+                    <div class="feature-card feature-sm">
+                        <div class="feature-icon">&#x1F3A4;</div>
+                        <h3>Voice Interview</h3>
+                        <p>No text boxes. Speak naturally — Gemini processes audio in real time and responds with voice.</p>
+                    </div>
+                    <div class="feature-card feature-sm">
+                        <div class="feature-icon">&#x1F4C4;</div>
+                        <h3>Resume Cross-Check</h3>
+                        <p>Wayne verifies your resume claims against the JD — probing gaps and inconsistencies live.</p>
+                    </div>
+                    <div class="feature-card feature-sm">
+                        <div class="feature-icon">&#x1F4CA;</div>
+                        <h3>Gap Analysis</h3>
+                        <p>Predicts your weak areas before the interview starts and drills you until you're strong.</p>
+                    </div>
+                    <div class="feature-card feature-sm">
+                        <div class="feature-icon">&#x1F4DD;</div>
+                        <h3>Detailed Report</h3>
+                        <p>Confidence score, filler words, STAR structure rating, technical depth — all scored.</p>
+                    </div>
+                    <div class="feature-card feature-sm">
+                        <div class="feature-icon">&#x1F30D;</div>
+                        <h3>14-Language Coaching</h3>
+                        <p>Get improvement tips in your native language while answering in English.</p>
+                    </div>
+                </div>
+
+                <!-- Differentiator strip -->
+                <div class="differentiator-strip">
+                    <h3>Why InterVU Beats Normal Mock Interviews</h3>
+                    <div class="diff-items">
+                        <div class="diff-item">
+                            <span class="diff-check">&#x2713;</span>
+                            <span>Real-time behavioral feedback</span>
+                        </div>
+                        <div class="diff-item">
+                            <span class="diff-check">&#x2713;</span>
+                            <span>Adaptive interviewer (not scripted)</span>
+                        </div>
+                        <div class="diff-item">
+                            <span class="diff-check">&#x2713;</span>
+                            <span>Voice + visual intelligence</span>
+                        </div>
+                        <div class="diff-item">
+                            <span class="diff-check">&#x2713;</span>
+                            <span>Interview pressure simulation</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Proof layer -->
+                <div class="proof-strip">
+                    <div class="proof-item">
+                        <span class="proof-value">87%</span>
+                        <span class="proof-label">users improved confidence in 3 sessions</span>
+                    </div>
+                    <div class="proof-divider"></div>
+                    <div class="proof-item">
+                        <span class="proof-value">2,300+</span>
+                        <span class="proof-label">mock interviews completed</span>
+                    </div>
+                    <div class="proof-divider"></div>
+                    <div class="proof-item">
+                        <span class="proof-value">120</span>
+                        <span class="proof-label">companies' engineers use InterVU</span>
+                    </div>
+                </div>
+
+                <!-- Transition CTA -->
+                <div class="section-transition">
+                    <a href="#how-it-works" class="transition-link">
+                        See How a Real Mock Interview Feels
+                        <span class="transition-arrow">&darr;</span>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- How It Works -->
+        <section id="how-it-works" class="how-section">
+            <div class="section-container">
+                <div class="section-header">
+                    <span class="section-tag">How It Works</span>
+                    <h2>Go From Job Description to<br><span class="gradient-text">Interview-Ready</span> in Minutes</h2>
+                    <p>Practice with a realistic AI interviewer and get a clear improvement plan instantly.</p>
+                </div>
+
+                <div class="steps-flow">
+                    <div class="steps-connector" aria-hidden="true">
+                        <span class="connector-line"></span>
+                    </div>
+                    <div class="steps-grid">
+                        <!-- Step 1 -->
+                        <div class="step-card" data-step="1">
+                            <div class="step-number">01</div>
+                            <div class="step-content">
+                                <h3>Paste JD + Resume</h3>
+                                <p>AI extracts required skills, predicts interview questions, and identifies your weak spots before you begin.</p>
+                                <div class="step-visual step-visual-match">
+                                    <div class="match-meter">
+                                        <div class="match-label">Skill Match</div>
+                                        <div class="match-bar-track">
+                                            <div class="match-bar-fill" style="width: 72%"></div>
+                                        </div>
+                                        <div class="match-value">72%</div>
+                                    </div>
+                                    <div class="question-preview">
+                                        <span class="qp-dot"></span>
+                                        <span class="qp-text">&#x201C;Explain your experience with distributed systems&#x201D;</span>
+                                    </div>
+                                </div>
+                                <div class="step-tags">
+                                    <span class="step-tag">Skill Extraction</span>
+                                    <span class="step-tag">Question Prediction</span>
+                                    <span class="step-tag">Gap Detection</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Step 2 — Hero Step -->
+                        <div class="step-card step-card-hero" data-step="2">
+                            <div class="step-hero-badge">&#x2B50; Core Experience</div>
+                            <div class="step-number">02</div>
+                            <div class="step-content">
+                                <h3>Live Interview with Wayne</h3>
+                                <p>Wayne watches your confidence, interrupts weak answers, probes deeper, and evaluates you like a real interviewer.</p>
+                                <div class="step-visual step-visual-live">
+                                    <div class="step-live-row">
+                                        <div class="step-confidence">
+                                            <div class="conf-label">Confidence</div>
+                                            <div class="conf-bar-track">
+                                                <div class="conf-bar-fill" style="width: 62%"></div>
+                                            </div>
+                                            <div class="conf-value">62%</div>
+                                        </div>
+                                        <div class="step-timer">02:13</div>
+                                    </div>
+                                    <div class="step-transcript">
+                                        <div class="st-msg"><strong>Wayne:</strong> Tell me about the trade-off you made.</div>
+                                        <div class="st-msg st-user"><strong>You:</strong> So basically we chose uh—</div>
+                                        <div class="st-interrupt-pulse">
+                                            <span class="si-dot"></span> Interrupting&hellip;
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="step-tags">
+                                    <span class="step-tag">Voice + Vision</span>
+                                    <span class="step-tag">Real-time AI</span>
+                                    <span class="step-tag">Smart Interruptions</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Step 3 -->
+                        <div class="step-card" data-step="3">
+                            <div class="step-number">03</div>
+                            <div class="step-content">
+                                <h3>Get Your Report</h3>
+                                <p>Receive a detailed breakdown with confidence score, weak areas, filler words, and exact steps to improve.</p>
+                                <div class="step-visual step-visual-report">
+                                    <div class="report-metric-row">
+                                        <div class="report-metric">
+                                            <span class="rm-value">78%</span>
+                                            <span class="rm-label">Confidence</span>
+                                        </div>
+                                        <div class="report-metric">
+                                            <span class="rm-value">6.5<small>/10</small></span>
+                                            <span class="rm-label">STAR Structure</span>
+                                        </div>
+                                    </div>
+                                    <div class="report-metric-row">
+                                        <div class="report-metric report-metric-good">
+                                            <span class="rm-value">Good</span>
+                                            <span class="rm-label">Eye Contact</span>
+                                        </div>
+                                        <div class="report-metric report-metric-warn">
+                                            <span class="rm-value">14</span>
+                                            <span class="rm-label">Fillers Detected</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="step-tags">
+                                    <span class="step-tag">Score Card</span>
+                                    <span class="step-tag">Body Language</span>
+                                    <span class="step-tag">Actionable Tips</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Meet Wayne -->
+        <section class="persona-section">
+            <div class="section-container">
+                <div class="persona-grid">
+                    <div class="persona-info">
+                        <span class="section-tag">Meet Your Interviewer</span>
+                        <h2>Wayne</h2>
+                        <p class="persona-title">Senior Engineering Manager &bull; 15 Years &bull; Top-Tier Tech</p>
+                        <p class="persona-desc">
+                            Wayne is not your friendly chatbot. A no-nonsense engineering leader who values
+                            clarity, technical depth, and professionalism. He'll challenge your assumptions,
+                            probe your knowledge gaps, and ensure you're camera-ready for the real thing.
+                        </p>
+                        <p class="persona-trust-line">
+                            <span class="trust-check">&#x2713;</span>
+                            Trained on real engineering interview patterns
+                        </p>
+                        <div class="persona-traits">
+                            <div class="trait">
+                                <span class="trait-icon">&#x1F50D;</span>
+                                <div>
+                                    <strong>The Interrogator</strong>
+                                    <p>Tests depth, clarity, and real experience.</p>
+                                </div>
+                            </div>
+                            <div class="trait">
+                                <span class="trait-icon">&#x1F440;</span>
+                                <div>
+                                    <strong>The Observer</strong>
+                                    <p>Tracks confidence, eye contact, and engagement.</p>
+                                </div>
+                            </div>
+                            <div class="trait">
+                                <span class="trait-icon">&#x1F393;</span>
+                                <div>
+                                    <strong>The Tutor</strong>
+                                    <p>Identifies weaknesses and fixes them immediately.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="persona-visual">
+                        <div class="persona-avatar">
+                            <div class="avatar-circle">
+                                <span>W</span>
+                            </div>
+                            <div class="avatar-ring"></div>
+                            <div class="avatar-thinking">
+                                <span class="thinking-dot"></span>
+                                <span class="thinking-dot"></span>
+                                <span class="thinking-dot"></span>
+                            </div>
+                        </div>
+                        <div class="persona-quote" id="wayne-quote">
+                            <span class="quote-text">&ldquo;Be specific &mdash; what was the measurable impact?&rdquo;</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA -->
+        <section class="cta-section">
+            <div class="section-container">
+                <div class="cta-content">
+                    <h2>Ready to Pass Your<br><span class="gradient-text">Next Interview?</span></h2>
+                    <p>Practice under real pressure. Fix mistakes fast. Walk in confident.</p>
+                    <button class="btn-primary-lg" onclick="enterApp()">
+                        Start Free Mock Interview
+                        <span class="btn-arrow">&rarr;</span>
+                    </button>
+                    <p class="cta-micro-trust">No signup &bull; 5-minute session &bull; Instant report</p>
+                </div>
+            </div>
+        </section>
+
+        <footer class="landing-footer">
+            <div class="section-container">
+                <div class="footer-content">
+                    <span class="footer-brand">InterVU</span>
+                    <span class="footer-text">Built and Powered by Gemini</span>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- ============ APP (hidden by default) ============ -->
+    <div id="app-page" class="hidden">
+        <header>
+            <div class="app-header-row">
+                <button class="btn-back" onclick="backToLanding()" title="Back to Home">&larr;</button>
+                <div>
+                    <h1>InterVU</h1>
+                    <p class="subtitle">The mock interview that actually sees you</p>
+                </div>
+            </div>
+        </header>
+
+        <main>
+            <!-- Phase 1: JD + Resume Input -->
+            <section id="jd-section" class="active">
+                <div class="input-grid">
+                    <div class="input-card">
+                        <h2>Job Description</h2>
+                        <div class="upload-row">
+                            <label class="file-upload-btn" for="jd-file">
+                                <span>Upload File</span>
+                                <input type="file" id="jd-file" accept=".txt,.pdf,.doc,.docx" onchange="handleFileUpload(this, 'jd-input')">
+                            </label>
+                            <span class="upload-hint">or paste below</span>
+                        </div>
+                        <textarea id="jd-input" rows="14"
+                            placeholder="Paste the full job description here..."></textarea>
+                    </div>
+                    <div class="input-card">
+                        <h2>Your Resume <span class="optional-tag">Optional</span></h2>
+                        <div class="upload-row">
+                            <label class="file-upload-btn" for="resume-file">
+                                <span>Upload File</span>
+                                <input type="file" id="resume-file" accept=".txt,.pdf,.doc,.docx" onchange="handleFileUpload(this, 'resume-input')">
+                            </label>
+                            <span class="upload-hint">or paste below</span>
+                        </div>
+                        <textarea id="resume-input" rows="14"
+                            placeholder="Paste your resume text here for cross-referencing..."></textarea>
+                    </div>
+                </div>
+
+                <div class="jd-options">
+                    <label for="lang-select">Coaching Language:</label>
+                    <select id="lang-select">
+                        <option value="English">English</option>
+                        <option value="Tamil" selected>Tamil</option>
+                        <option value="Hindi">Hindi</option>
+                        <option value="Telugu">Telugu</option>
+                        <option value="Kannada">Kannada</option>
+                        <option value="Malayalam">Malayalam</option>
+                        <option value="Spanish">Spanish</option>
+                        <option value="French">French</option>
+                        <option value="Mandarin">Mandarin</option>
+                        <option value="Japanese">Japanese</option>
+                        <option value="Korean">Korean</option>
+                        <option value="Arabic">Arabic</option>
+                        <option value="Portuguese">Portuguese</option>
+                        <option value="German">German</option>
+                    </select>
+                </div>
+
+                <button id="parse-btn" onclick="parseJD()">Analyze &amp; Prepare Interview</button>
+
+                <div id="skills-display" class="hidden">
+                    <div class="analysis-grid">
+                        <div class="analysis-card">
+                            <h3>JD Requirements</h3>
+                            <div id="skills-content"></div>
+                        </div>
+                        <div id="resume-display" class="analysis-card hidden">
+                            <h3>Resume Profile</h3>
+                            <div id="resume-content"></div>
+                        </div>
+                    </div>
+                    <div id="gap-analysis" class="hidden">
+                        <h3>Gap Analysis</h3>
+                        <div id="gap-content"></div>
+                    </div>
+                    <button id="start-btn" onclick="startInterview()">Start Interview with Wayne</button>
+                </div>
+            </section>
+
+            <!-- Phase 2: Live Interview (No Text Box — voice & vision only) -->
+            <section id="interview-section" class="hidden">
+                <div class="interview-split">
+                    <!-- Left: Video feed + controls -->
+                    <div class="interview-main">
+                        <div class="video-container">
+                            <video id="local-video" autoplay muted playsinline></video>
+                            <div id="status-indicator">Connecting...</div>
+                        </div>
+                        <div class="controls">
+                            <button id="mic-btn" onclick="toggleMic()" class="btn-mic" title="Toggle Microphone">
+                                <span id="mic-icon">&#x1F3A4;</span>
+                                <span id="mic-label">Mute</span>
+                            </button>
+                            <button id="end-btn" onclick="endInterview()" class="btn-danger">End Interview</button>
+                        </div>
+                    </div>
+
+                    <!-- Right: Live processing log -->
+                    <div class="log-panel">
+                        <h3>Live Processing</h3>
+                        <div id="log-content">
+                            <div class="log-entry log-info">Waiting for connection...</div>
+                        </div>
+                        <div class="log-stats">
+                            <div class="stat">
+                                <span class="stat-label">Audio Chunks</span>
+                                <span id="stat-audio" class="stat-value">0</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-label">Video Frames</span>
+                                <span id="stat-video" class="stat-value">0</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-label">AI Responses</span>
+                                <span id="stat-responses" class="stat-value">0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Phase 3: Report -->
+            <section id="report-section" class="hidden">
+                <h2>Interview Report</h2>
+                <div id="report-content"></div>
+                <button onclick="location.reload()">Start New Interview</button>
+            </section>
+        </main>
+    </div>
+
+    <script src="/js/needle-lines.js"></script>
+    <script src="/js/toast.js"></script>
+    <script src="/js/log-panel.js"></script>
+    <script src="/js/audio-player.js"></script>
+    <script src="/js/media-capture.js"></script>
+    <script src="/js/websocket-client.js"></script>
+    <script src="/js/jd-parser.js"></script>
+    <script src="/js/report-view.js"></script>
+    <script src="/js/app.js"></script>
+</body>
+</html>
