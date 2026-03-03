@@ -1,26 +1,16 @@
-from langchain_google_genai import ChatGoogleGenerativeAI
-
-from app.config import settings
+from app.services.bedrock_llm import bedrock_converse_json
 from app.models.schemas import ExtractedSkills
 
 
 async def parse_job_description(jd_text: str) -> ExtractedSkills:
-    llm = ChatGoogleGenerativeAI(
-        model=settings.gemini_chat_model,
-        google_api_key=settings.google_api_key,
-        temperature=0.1,
-    )
-
-    structured_llm = llm.with_structured_output(ExtractedSkills)
-
     prompt = (
-        "Analyze this job description and extract:\n"
-        "- The top 3 most critical technical skills required\n"
-        "- The top 2 most important soft skills required\n"
-        "- The job title\n"
-        "- A one-sentence company/role context summary\n\n"
+        "Analyze this job description and extract the following as JSON:\n"
+        '- "technical_skills": list of top 3 most critical technical skills (strings)\n'
+        '- "soft_skills": list of top 2 most important soft skills (strings)\n'
+        '- "job_title": the job title (string)\n'
+        '- "company_context": one-sentence company/role context summary (string)\n\n'
         f"Job Description:\n{jd_text}"
     )
 
-    result = await structured_llm.ainvoke(prompt)
-    return result
+    data = await bedrock_converse_json(prompt)
+    return ExtractedSkills(**data)

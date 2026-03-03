@@ -84,7 +84,7 @@
                             <div class="mockup-cam">
                                 <svg class="mockup-cam-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
                                     <defs>
-                                        <linearGradient id="gemini-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <linearGradient id="ai-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
                                             <stop offset="0%" style="stop-color:#4285F4;stop-opacity:1"/>
                                             <stop offset="100%" style="stop-color:#DB4437;stop-opacity:1"/>
                                         </linearGradient>
@@ -112,7 +112,7 @@
                                     <g id="interaction-bubble">
                                         <path d="M240,80 L440,80 C462.09,80 480,97.91 480,120 L480,260 C480,282.09 462.09,300 440,300 L320,300 L260,360 L260,300 L240,300 C217.91,300 200,282.09 200,260 L200,120 C200,97.91 217.91,80 240,80 Z" fill="#FFFFFF" stroke="#E8EAED" stroke-width="8" transform="translate(14, -81) scale(0.6)" style="transform-box: fill-box; transform-origin: center center;"/>
                                         <g transform="translate(260, 130) scale(0.8)">
-                                            <path d="M100,0 C100,55.23 144.77,100 200,100 C144.77,100 100,144.77 100,200 C100,144.77 55.23,100 0,100 C55.23,100 100,55.23 100,0 Z" fill="url(#gemini-gradient)" transform="translate(16, -105) scale(0.7)" style="transform-box: fill-box; transform-origin: center center;">
+                                            <path d="M100,0 C100,55.23 144.77,100 200,100 C144.77,100 100,144.77 100,200 C100,144.77 55.23,100 0,100 C55.23,100 100,55.23 100,0 Z" fill="url(#ai-gradient)" transform="translate(16, -105) scale(0.7)" style="transform-box: fill-box; transform-origin: center center;">
                                                 <animateTransform attributeName="transform" type="translate" values="0,0; 0,-10; 0,0" dur="2s" repeatCount="indefinite" calcMode="spline" keySplines="0.4 0 0.2 1; 0.4 0 0.2 1" additive="sum"/>
                                             </path>
                                             <path d="M180,20 C180,42.09 197.91,60 220,60 C197.91,60 180,77.91 180,100 C180,77.91 162.09,60 140,60 C162.09,60 180,42.09 180,20 Z" fill="url(#sparkle-gradient)" opacity="0.9" transform="translate(-8, -122) scale(0.6)" style="transform-box: fill-box; transform-origin: center center;">
@@ -245,7 +245,7 @@
                     <div class="feature-card feature-sm">
                         <div class="feature-icon">&#x1F3A4;</div>
                         <h3>Voice Interview</h3>
-                        <p>No text boxes. Speak naturally — Gemini processes audio in real time and responds with voice.</p>
+                        <p>No text boxes. Speak naturally — Nova Sonic processes audio in real time and responds with voice.</p>
                     </div>
                     <div class="feature-card feature-sm">
                         <div class="feature-icon">&#x1F4C4;</div>
@@ -515,7 +515,7 @@
             <div class="section-container">
                 <div class="footer-content">
                     <span class="footer-brand">InterVU</span>
-                    <span class="footer-text">Built and Powered by Gemini</span>
+                    <span class="footer-text">Built and Powered by Amazon Nova</span>
                 </div>
             </div>
         </footer>
@@ -655,12 +655,11 @@
         </main>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/livekit-client/dist/livekit-client.umd.min.js"></script>
     <script src="/js/needle-lines.js"></script>
     <script src="/js/toast.js"></script>
     <script src="/js/log-panel.js"></script>
-    <script src="/js/audio-player.js"></script>
-    <script src="/js/media-capture.js"></script>
-    <script src="/js/websocket-client.js"></script>
+    <script src="/js/livekit-client.js"></script>
     <script src="/js/jd-parser.js"></script>
     <script src="/js/report-view.js"></script>
     <script src="/js/app.js"></script>

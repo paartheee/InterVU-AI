@@ -5,13 +5,13 @@ from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 
 from app.config import settings
-from app.routers import jd_parser, interview, report
+from app.routers import jd_parser, livekit_token, report
 
-app = FastAPI(title="InterAI", version="0.1.0")
+app = FastAPI(title="InterAI", version="0.2.0")
 
 # Register API routers before the static file catch-all
 app.include_router(jd_parser.router, prefix="/api")
-app.include_router(interview.router)
+app.include_router(livekit_token.router, prefix="/api")
 app.include_router(report.router, prefix="/api")
 
 

@@ -2,11 +2,19 @@ from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
-    google_api_key: str = ""
-    gcs_bucket_name: str = "interai-reports"
-    gcs_enabled: bool = False
-    gemini_live_model: str = "gemini-2.0-flash-live-001"
-    gemini_chat_model: str = "gemini-2.0-flash"
+    # AWS Bedrock
+    aws_region: str = "us-east-1"
+    aws_access_key_id: str = ""
+    aws_secret_access_key: str = ""
+    bedrock_text_model: str = "amazon.nova-lite-v1:0"
+    bedrock_vision_model: str = "amazon.nova-pro-v1:0"
+
+    # LiveKit
+    livekit_url: str = ""
+    livekit_api_key: str = ""
+    livekit_api_secret: str = ""
+
+    # App
     host: str = "0.0.0.0"
     port: int = 8080
     local_report_dir: str = "reports"

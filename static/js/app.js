@@ -6,7 +6,7 @@ const appState = {
     sessionId: null,
 };
 
-let interviewWS = null;
+let interviewClient = null;
 
 // ---- Landing / App page transition ----
 
@@ -101,51 +101,94 @@ async function startInterview() {
 
     showSection('interview');
     resetLogPanel();
-    addLogEntry('Initializing interview session...', 'info');
+    addLogEntry('Requesting LiveKit token...', 'info');
 
-    interviewWS = new InterviewWebSocket();
+    try {
+        // Request token from FastAPI
+        const tokenResp = await fetch('/api/livekit-token', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                system_prompt: appState.systemPrompt,
+                skills_json: JSON.stringify(appState.extractedSkills),
+            }),
+        });
 
-    interviewWS.onSessionStarted = (sessionId) => {
-        appState.sessionId = sessionId;
-        const indicator = document.getElementById('status-indicator');
-        indicator.textContent = 'Interview Active';
-        indicator.className = 'active';
-        showToast('Interview started — Wayne is ready', 'success');
-        addLogEntry('Gemini Live session active — streaming media', 'info');
-    };
+        if (!tokenResp.ok) {
+            const err = await tokenResp.json();
+            throw new Error(err.detail || `HTTP ${tokenResp.status}`);
+        }
 
-    interviewWS.onInterviewEnded = (msg) => {
-        showToast('Interview complete — generating report...', 'info');
-        fetchAndDisplayReport(
-            msg.session_id,
-            msg.summary,
-            JSON.stringify(appState.extractedSkills)
-        );
-    };
+        const { server_url, participant_token, room_name } = await tokenResp.json();
+        appState.sessionId = room_name;
+        addLogEntry(`Token received for room: ${room_name}`, 'info');
 
-    interviewWS.onError = (errMsg) => {
-        const indicator = document.getElementById('status-indicator');
-        indicator.textContent = 'Error';
-        indicator.className = 'error';
-    };
+        // Connect via LiveKit
+        interviewClient = new LiveKitInterviewClient();
 
-    interviewWS.connect(appState.systemPrompt);
+        interviewClient.onConnected = (roomName) => {
+            addLogEntry(`Connected to LiveKit room: ${roomName}`, 'info');
+            const indicator = document.getElementById('status-indicator');
+            indicator.textContent = 'Waiting for Wayne...';
+            indicator.className = '';
+        };
+
+        interviewClient.onAgentJoined = (participant) => {
+            const indicator = document.getElementById('status-indicator');
+            indicator.textContent = 'Interview Active';
+            indicator.className = 'active';
+            showToast('Wayne has joined — interview starting', 'success');
+            addLogEntry('Agent (Wayne) joined the room', 'info');
+        };
+
+        interviewClient.onInterviewEnded = (data) => {
+            showToast('Interview complete — generating report...', 'info');
+            addLogEntry('Interview ended — generating report', 'info');
+            interviewClient.disconnect();
+            fetchAndDisplayReport(
+                appState.sessionId,
+                data.summary,
+                data.skills_json || JSON.stringify(appState.extractedSkills)
+            );
+        };
+
+        interviewClient.onError = (errMsg) => {
+            const indicator = document.getElementById('status-indicator');
+            indicator.textContent = 'Error';
+            indicator.className = 'error';
+            showToast('Error: ' + errMsg, 'error');
+        };
+
+        interviewClient.onDisconnected = () => {
+            const indicator = document.getElementById('status-indicator');
+            if (indicator.textContent !== 'Ending interview...') {
+                indicator.textContent = 'Disconnected';
+                indicator.className = 'error';
+            }
+        };
+
+        await interviewClient.connect(server_url, participant_token);
+
+    } catch (err) {
+        showToast('Failed to start interview: ' + err.message, 'error');
+        addLogEntry(`Error: ${err.message}`, 'interrupt');
+    }
 }
 
 function endInterview() {
-    if (interviewWS) {
+    if (interviewClient) {
         const indicator = document.getElementById('status-indicator');
         indicator.textContent = 'Ending interview...';
         document.getElementById('end-btn').disabled = true;
-        addLogEntry('User clicked End Interview — requesting summary from Gemini', 'info');
-        interviewWS.sendEnd();
+        addLogEntry('User clicked End Interview', 'info');
+        interviewClient.sendEndInterview();
     }
 }
 
 function toggleMic() {
-    if (!interviewWS) return;
+    if (!interviewClient) return;
 
-    const isMuted = interviewWS.toggleMute();
+    const isMuted = interviewClient.toggleMute();
     const btn = document.getElementById('mic-btn');
     const icon = document.getElementById('mic-icon');
     const label = document.getElementById('mic-label');
