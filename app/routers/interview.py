@@ -4,6 +4,7 @@ import json
 import logging
 
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
+from starlette.websockets import WebSocketState
 
 from app.services.gemini_live import GeminiLiveSession
 
@@ -12,6 +13,15 @@ router = APIRouter()
 
 # In-memory session store (hackathon; production would use Redis)
 active_sessions: dict[str, GeminiLiveSession] = {}
+
+
+def _ws_open(ws: WebSocket) -> bool:
+    return ws.client_state == WebSocketState.CONNECTED
+
+
+async def _safe_send(ws: WebSocket, data: dict):
+    if _ws_open(ws):
+        await ws.send_json(data)
 
 
 @router.websocket("/ws/interview")
@@ -23,7 +33,7 @@ async def interview_websocket(websocket: WebSocket):
         # Wait for the "start" message with system_prompt
         init_msg = await websocket.receive_json()
         if init_msg.get("type") != "start":
-            await websocket.send_json({
+            await _safe_send(websocket, {
                 "type": "error",
                 "data": "First message must be type 'start'",
             })
@@ -37,7 +47,7 @@ async def interview_websocket(websocket: WebSocket):
         await gemini_session.connect()
         active_sessions[gemini_session.session_id] = gemini_session
 
-        await websocket.send_json({
+        await _safe_send(websocket, {
             "type": "session_started",
             "session_id": gemini_session.session_id,
         })
@@ -66,31 +76,39 @@ async def interview_websocket(websocket: WebSocket):
 
                         # Send periodic backend log events
                         if audio_chunks_received % 20 == 0:
-                            await websocket.send_json({
+                            await _safe_send(websocket, {
                                 "type": "log",
                                 "level": "audio",
                                 "data": f"Backend processed {audio_chunks_received} audio chunks ({len(audio_bytes)} bytes/chunk)",
                             })
+
+                    elif data["type"] == "turn_complete":
+                        mode = await gemini_session.send_turn_complete()
+                        await _safe_send(websocket, {
+                            "type": "log",
+                            "level": "info",
+                            "data": f"Client signaled user turn complete ({mode})",
+                        })
 
                     elif data["type"] == "video":
                         jpeg_bytes = base64.b64decode(data["data"])
                         await gemini_session.send_video_frame(jpeg_bytes)
                         video_frames_received += 1
 
-                        await websocket.send_json({
+                        await _safe_send(websocket, {
                             "type": "log",
                             "level": "video",
                             "data": f"Frame #{video_frames_received} sent to Gemini ({len(jpeg_bytes)} bytes JPEG)",
                         })
 
                     elif data["type"] == "end":
-                        await websocket.send_json({
+                        await _safe_send(websocket, {
                             "type": "log",
                             "level": "info",
                             "data": f"Session stats: {audio_chunks_received} audio chunks, {video_frames_received} video frames processed",
                         })
                         summary = await gemini_session.end_interview()
-                        await websocket.send_json({
+                        await _safe_send(websocket, {
                             "type": "interview_ended",
                             "session_id": gemini_session.session_id,
                             "summary": summary,
@@ -99,7 +117,7 @@ async def interview_websocket(websocket: WebSocket):
 
         async def forward_to_browser():
             """Receive from Gemini, forward to browser WebSocket."""
-            while gemini_session._is_active:
+            while gemini_session._is_active and _ws_open(websocket):
                 try:
                     output = await asyncio.wait_for(
                         gemini_session.get_next_output(), timeout=1.0
@@ -107,27 +125,30 @@ async def interview_websocket(websocket: WebSocket):
                 except asyncio.TimeoutError:
                     continue
 
+                if not _ws_open(websocket):
+                    break
+
                 if output["type"] == "audio":
-                    await websocket.send_json({
+                    await _safe_send(websocket, {
                         "type": "audio",
                         "data": base64.b64encode(output["data"]).decode("ascii"),
                     })
                 elif output["type"] == "interrupted":
-                    await websocket.send_json({"type": "interrupted"})
-                    await websocket.send_json({
+                    await _safe_send(websocket, {"type": "interrupted"})
+                    await _safe_send(websocket, {
                         "type": "log",
                         "level": "interrupt",
                         "data": "Gemini interrupted — detected user activity (speaking/visual cue)",
                     })
                 elif output["type"] == "turn_complete":
-                    await websocket.send_json({"type": "turn_complete"})
+                    await _safe_send(websocket, {"type": "turn_complete"})
                 elif output["type"] == "text":
-                    await websocket.send_json({
+                    await _safe_send(websocket, {
                         "type": "text",
                         "data": output["data"],
                     })
                 elif output["type"] == "error":
-                    await websocket.send_json({
+                    await _safe_send(websocket, {
                         "type": "error",
                         "data": output["data"],
                     })
@@ -144,7 +165,7 @@ async def interview_websocket(websocket: WebSocket):
     except Exception as e:
         logger.error(f"WebSocket error: {e}")
         try:
-            await websocket.send_json({"type": "error", "data": str(e)})
+            await _safe_send(websocket, {"type": "error", "data": str(e)})
         except Exception:
             pass
     finally:

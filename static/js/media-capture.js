@@ -8,8 +8,42 @@ class MediaCapture {
         this.canvasCtx = this.canvas.getContext('2d');
         this.onAudioChunk = null;
         this.onVideoFrame = null;
+        this.onSpeechEnd = null;
         this._videoIntervalId = null;
         this._isMuted = false;
+        this._modelSpeaking = false;     // true while AI is outputting audio
+        this._echoCooldownUntil = 0;     // timestamp: suppress mic until this time
+        this._inputLockUntil = 0;        // timestamp: pause mic forwarding temporarily
+        this._awaitingModelResponse = false;
+        this._awaitingModelDeadline = 0;
+        this._isUserSpeaking = false;
+        this._lastVoiceAt = 0;
+        this._noiseFloor = 0.0;
+    }
+
+    /** Call when AI starts sending audio */
+    setModelSpeaking(speaking) {
+        this._modelSpeaking = speaking;
+        if (speaking) {
+            this._inputLockUntil = 0;
+            this._awaitingModelResponse = false;
+            this._awaitingModelDeadline = 0;
+            this._isUserSpeaking = false;
+            return;
+        }
+        // After model stops, add 500ms cooldown for echo to fade
+        this._echoCooldownUntil = performance.now() + 500;
+    }
+
+    lockInput(ms = 1500) {
+        this._inputLockUntil = performance.now() + ms;
+        this._isUserSpeaking = false;
+    }
+
+    beginAwaitingModelResponse(timeoutMs = 8000) {
+        this._awaitingModelResponse = true;
+        this._awaitingModelDeadline = performance.now() + timeoutMs;
+        this._isUserSpeaking = false;
     }
 
     async start() {
@@ -19,11 +53,12 @@ class MediaCapture {
                 channelCount: 1,
                 echoCancellation: true,
                 noiseSuppression: true,
+                autoGainControl: true,
             },
             video: {
-                width: { ideal: 640 },
-                height: { ideal: 480 },
-                frameRate: { ideal: 15 },
+                width: { ideal: 320 },
+                height: { ideal: 240 },
+                frameRate: { ideal: 1 },
             },
         });
 
@@ -34,11 +69,75 @@ class MediaCapture {
         this.audioContext = new AudioContext({ sampleRate: 16000 });
         const source = this.audioContext.createMediaStreamSource(this.stream);
 
+        // Voice activity detection tuned for noisy rooms
+        const BASE_RMS_THRESHOLD = 0.012;
+        const NOISE_MULTIPLIER = 3.0;
+        const SPEECH_HANGOVER_MS = 250;
+        const SPEECH_RELEASE_MS = 900;
+
         this.audioProcessor = this.audioContext.createScriptProcessor(4096, 1, 1);
         this.audioProcessor.onaudioprocess = (event) => {
             if (this._isMuted) return;
 
+            // Suppress mic while AI is speaking to prevent echo feedback
+            if (this._modelSpeaking) return;
+            if (performance.now() < this._echoCooldownUntil) return;
+            if (performance.now() < this._inputLockUntil) return;
+
+            if (this._awaitingModelResponse) {
+                if (performance.now() < this._awaitingModelDeadline) {
+                    return;
+                }
+                this._awaitingModelResponse = false;
+                this._awaitingModelDeadline = 0;
+            }
+
             const float32 = event.inputBuffer.getChannelData(0);
+
+            // Calculate RMS energy
+            let sumSq = 0;
+            for (let i = 0; i < float32.length; i++) {
+                sumSq += float32[i] * float32[i];
+            }
+            const rms = Math.sqrt(sumSq / float32.length);
+            const now = performance.now();
+
+            // Adapt noise floor only while user is not speaking and signal is low
+            if (!this._isUserSpeaking && rms < 0.03) {
+                if (this._noiseFloor === 0) {
+                    this._noiseFloor = rms;
+                } else {
+                    this._noiseFloor = this._noiseFloor * 0.95 + rms * 0.05;
+                }
+            }
+
+            const dynamicThreshold = Math.max(
+                BASE_RMS_THRESHOLD,
+                this._noiseFloor * NOISE_MULTIPLIER
+            );
+            const voiceDetected = rms >= dynamicThreshold;
+
+            if (voiceDetected) {
+                this._lastVoiceAt = now;
+                if (!this._isUserSpeaking) {
+                    this._isUserSpeaking = true;
+                }
+            }
+
+            const withinHangover = this._isUserSpeaking
+                && (now - this._lastVoiceAt) <= SPEECH_HANGOVER_MS;
+
+            if (!voiceDetected && !withinHangover) {
+                if (
+                    this._isUserSpeaking
+                    && (now - this._lastVoiceAt) >= SPEECH_RELEASE_MS
+                ) {
+                    this._isUserSpeaking = false;
+                    if (this.onSpeechEnd) this.onSpeechEnd();
+                }
+                return;
+            }
+
             const int16 = new Int16Array(float32.length);
             for (let i = 0; i < float32.length; i++) {
                 int16[i] = Math.max(-32768, Math.min(32767, Math.round(float32[i] * 32767)));
@@ -50,15 +149,15 @@ class MediaCapture {
         source.connect(this.audioProcessor);
         this.audioProcessor.connect(this.audioContext.destination);
 
-        // Video frame capture at ~1 FPS via canvas (768x768 JPEG)
-        this.canvas.width = 768;
-        this.canvas.height = 768;
+        // Video frame capture at 1 frame per 10 seconds (512x512 JPEG)
+        this.canvas.width = 512;
+        this.canvas.height = 512;
         this._videoIntervalId = setInterval(() => {
-            this.canvasCtx.drawImage(this.videoElement, 0, 0, 768, 768);
-            const dataUrl = this.canvas.toDataURL('image/jpeg', 0.7);
+            this.canvasCtx.drawImage(this.videoElement, 0, 0, 512, 512);
+            const dataUrl = this.canvas.toDataURL('image/jpeg', 0.5);
             const base64 = dataUrl.split(',')[1];
             if (this.onVideoFrame) this.onVideoFrame(base64);
-        }, 1000);
+        }, 10000);
     }
 
     toggleMute() {
@@ -92,6 +191,12 @@ class MediaCapture {
             this.stream.getTracks().forEach(t => t.stop());
             this.stream = null;
         }
+        this._isUserSpeaking = false;
+        this._lastVoiceAt = 0;
+        this._noiseFloor = 0.0;
+        this._inputLockUntil = 0;
+        this._awaitingModelResponse = false;
+        this._awaitingModelDeadline = 0;
     }
 }
 

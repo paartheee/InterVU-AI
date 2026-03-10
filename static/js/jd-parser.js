@@ -73,7 +73,35 @@ async function parseJD() {
 
     const btn = document.getElementById('parse-btn');
     btn.disabled = true;
+    btn.classList.add('loading');
     btn.textContent = resumeText ? 'Analyzing JD + Resume...' : 'Analyzing JD...';
+
+    // Show progress steps
+    let progress = document.getElementById('analysis-progress');
+    if (!progress) {
+        progress = document.createElement('div');
+        progress.id = 'analysis-progress';
+        progress.className = 'analysis-progress';
+        btn.insertAdjacentElement('afterend', progress);
+    }
+    const steps = resumeText
+        ? ['Parsing JD', 'Parsing Resume', 'Building Interview']
+        : ['Parsing JD', 'Building Interview'];
+    progress.innerHTML = steps.map((s, i) =>
+        `<span class="step${i === 0 ? ' active' : ''}"><span class="step-dot"></span>${s}</span>`
+    ).join('');
+    progress.style.display = '';
+
+    // Animate progress steps on a timer
+    let stepIdx = 0;
+    const stepTimer = setInterval(() => {
+        stepIdx++;
+        if (stepIdx < steps.length) {
+            progress.querySelectorAll('.step').forEach((el, i) => {
+                el.className = 'step' + (i < stepIdx ? ' done' : i === stepIdx ? ' active' : '');
+            });
+        }
+    }, resumeText ? 3000 : 4000);
 
     try {
         const response = await fetch('/api/parse-jd', {
@@ -133,7 +161,11 @@ async function parseJD() {
     } catch (err) {
         showToast('Error parsing: ' + err.message, 'error');
     } finally {
+        clearInterval(stepTimer);
+        progress.querySelectorAll('.step').forEach(el => el.className = 'step done');
+        setTimeout(() => { progress.style.display = 'none'; }, 500);
         btn.disabled = false;
+        btn.classList.remove('loading');
         btn.textContent = 'Analyze & Prepare Interview';
     }
 }

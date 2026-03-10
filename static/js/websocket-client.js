@@ -56,18 +56,21 @@ class InterviewWebSocket {
                     const pcmBytes = Uint8Array.from(
                         atob(msg.data), c => c.charCodeAt(0)
                     );
+                    // Suppress mic while AI is speaking (echo prevention)
+                    this.mediaCapture.setModelSpeaking(true);
                     this.audioPlayer.enqueue(pcmBytes);
                     updateStat('responses');
-                    addLogEntry(`AI audio chunk: ${pcmBytes.length} bytes`, 'ai');
                     break;
                 }
 
                 case 'interrupted':
+                    this.mediaCapture.setModelSpeaking(false);
                     this.audioPlayer.clearBuffer();
                     addLogEntry('AI INTERRUPTED (user speaking)', 'interrupt');
                     break;
 
                 case 'turn_complete':
+                    this.mediaCapture.setModelSpeaking(false);
                     addLogEntry('AI turn complete', 'ai');
                     break;
 
@@ -133,6 +136,15 @@ class InterviewWebSocket {
             }
         };
 
+        this.mediaCapture.onSpeechEnd = () => {
+            if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+                this.mediaCapture.lockInput(1800);
+                this.mediaCapture.beginAwaitingModelResponse(8000);
+                this.ws.send(JSON.stringify({ type: 'turn_complete' }));
+                addLogEntry('User turn complete detected', 'info');
+            }
+        };
+
         this.mediaCapture.onVideoFrame = (base64Jpeg) => {
             if (this.ws && this.ws.readyState === WebSocket.OPEN) {
                 this.ws.send(JSON.stringify({ type: 'video', data: base64Jpeg }));
@@ -141,7 +153,10 @@ class InterviewWebSocket {
             }
         };
 
-        this.mediaCapture.start();
+        this.mediaCapture.start().catch(err => {
+            addLogEntry(`Media capture failed: ${err.message}`, 'interrupt');
+            showToast('Camera/mic access denied — try localhost instead of 0.0.0.0', 'error', 8000);
+        });
     }
 
     sendEnd() {

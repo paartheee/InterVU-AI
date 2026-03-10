@@ -6,10 +6,14 @@ class AudioPlayer {
     }
 
     _ensureContext() {
-        if (!this.audioContext) {
+        if (!this.audioContext || this.audioContext.state === 'closed') {
             // Gemini outputs 24kHz PCM
             this.audioContext = new AudioContext({ sampleRate: 24000 });
             this.nextStartTime = this.audioContext.currentTime;
+        }
+        // Resume suspended context (can happen when created without user gesture)
+        if (this.audioContext.state === 'suspended') {
+            this.audioContext.resume();
         }
     }
 
@@ -53,11 +57,13 @@ class AudioPlayer {
             try { source.stop(); } catch (e) { /* already stopped */ }
         }
         this.scheduledSources = [];
-        this.nextStartTime = 0;
 
-        if (this.audioContext) {
-            this.audioContext.close();
-            this.audioContext = null;
+        // Reset scheduling time but keep the AudioContext alive so future
+        // audio chunks can play without needing a new user gesture.
+        if (this.audioContext && this.audioContext.state !== 'closed') {
+            this.nextStartTime = this.audioContext.currentTime;
+        } else {
+            this.nextStartTime = 0;
         }
     }
 

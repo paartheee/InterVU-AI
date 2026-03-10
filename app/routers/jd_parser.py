@@ -1,3 +1,5 @@
+import asyncio
+
 from fastapi import APIRouter, HTTPException
 
 from app.models.schemas import ParseJDRequest, ParseJDResponse
@@ -13,12 +15,17 @@ async def parse_jd(request: ParseJDRequest):
     if len(request.job_description.strip()) < 50:
         raise HTTPException(status_code=400, detail="Job description too short")
 
-    skills = await parse_job_description(request.job_description)
+    has_resume = request.resume_text and len(request.resume_text.strip()) > 30
 
-    # Parse resume if provided
-    parsed_resume = None
-    if request.resume_text and len(request.resume_text.strip()) > 30:
-        parsed_resume = await parse_resume(request.resume_text)
+    if has_resume:
+        # Run JD and resume parsing in parallel
+        skills, parsed_resume = await asyncio.gather(
+            parse_job_description(request.job_description),
+            parse_resume(request.resume_text),
+        )
+    else:
+        skills = await parse_job_description(request.job_description)
+        parsed_resume = None
 
     system_prompt = build_system_prompt(
         skills, request.candidate_language, parsed_resume

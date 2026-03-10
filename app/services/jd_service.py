@@ -1,17 +1,9 @@
-from langchain_google_genai import ChatGoogleGenerativeAI
-
-from app.config import settings
+from app.services.llm import get_llm
 from app.models.schemas import ExtractedSkills
 
 
 async def parse_job_description(jd_text: str) -> ExtractedSkills:
-    llm = ChatGoogleGenerativeAI(
-        model=settings.gemini_chat_model,
-        google_api_key=settings.google_api_key,
-        temperature=0.1,
-    )
-
-    structured_llm = llm.with_structured_output(ExtractedSkills)
+    structured_llm = get_llm().with_structured_output(ExtractedSkills)
 
     prompt = (
         "Analyze this job description and extract:\n"
