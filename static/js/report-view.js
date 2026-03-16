@@ -71,20 +71,12 @@ async function fetchAndDisplayReport(sessionId, summaryText, skillsJson) {
             html += '</div>';
         }
 
-        // Coaching plan
-        if (data.coaching_plan) {
-            html += `
-                <h4>Coaching Plan</h4>
-                <div class="coaching-plan">${data.coaching_plan.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')}</div>
-            `;
-        }
-
         // Action buttons
         html += `
                 <div class="report-actions">
+                    ${data.coaching_plan ? '<button class="btn-coaching" onclick="openCoachingPlan()">View Coaching Plan</button>' : ''}
                     <button onclick="printReport()">Print / Save PDF</button>
                     <button onclick="copyShareLink()">Copy Share Link</button>
-                    <button onclick="downloadCoachingPlan()">Download Coaching Plan</button>
                     ${typeof getRecordingBlob === 'function' ? '<button onclick="downloadRecording()">Download Recording</button>' : ''}
                     <button onclick="showSection('history')">View History</button>
                     <button onclick="location.reload()">Start New Interview</button>
@@ -93,6 +85,25 @@ async function fetchAndDisplayReport(sessionId, summaryText, skillsJson) {
                 <p class="storage-info">Report saved: ${data.storage_location}</p>
             </div>
         `;
+
+        // Coaching plan modal (hidden by default)
+        if (data.coaching_plan) {
+            html += `
+            <div id="coaching-modal" class="coaching-modal hidden">
+                <div class="coaching-modal-backdrop" onclick="closeCoachingPlan()"></div>
+                <div class="coaching-modal-content">
+                    <div class="coaching-modal-header">
+                        <h3>Coaching Plan</h3>
+                        <div class="coaching-modal-actions">
+                            <button onclick="downloadCoachingPlan()" title="Download">Download</button>
+                            <button onclick="closeCoachingPlan()" title="Close">Close</button>
+                        </div>
+                    </div>
+                    <div class="coaching-plan">${data.coaching_plan.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')}</div>
+                </div>
+            </div>
+            `;
+        }
 
         container.innerHTML = html;
 

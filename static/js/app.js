@@ -234,6 +234,22 @@ function printReport() {
     window.print();
 }
 
+function openCoachingPlan() {
+    const modal = document.getElementById('coaching-modal');
+    if (modal) {
+        modal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    }
+}
+
+function closeCoachingPlan() {
+    const modal = document.getElementById('coaching-modal');
+    if (modal) {
+        modal.classList.add('hidden');
+        document.body.style.overflow = '';
+    }
+}
+
 function downloadCoachingPlan() {
     const planEl = document.querySelector('.coaching-plan');
     if (!planEl) {
