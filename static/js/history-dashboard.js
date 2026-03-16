@@ -92,21 +92,36 @@ async function loadInterviewDetail(interviewId) {
                 html += '</div>';
             }
 
-            // Coaching plan
-            if (r.coaching_plan) {
-                html += `<h4>Coaching Plan</h4><div class="coaching-plan">${r.coaching_plan.replace(/\n/g, '<br>')}</div>`;
-            }
         } else {
             html += '<p>No report available for this interview.</p>';
         }
 
         html += `
             <div class="report-actions">
+                ${r && r.coaching_plan ? '<button class="btn-coaching" onclick="openCoachingPlan()">View Coaching Plan</button>' : ''}
                 <button onclick="loadTranscriptView('${interviewId}')">View Transcript</button>
                 <button onclick="loadComparisonView('${i.job_title}')">Compare Progress</button>
                 <button onclick="document.getElementById('history-detail').classList.add('hidden')">Back to List</button>
             </div>
         </div>`;
+
+        // Coaching plan modal
+        if (r && r.coaching_plan) {
+            html += `
+            <div id="coaching-modal" class="coaching-modal hidden">
+                <div class="coaching-modal-backdrop" onclick="closeCoachingPlan()"></div>
+                <div class="coaching-modal-content">
+                    <div class="coaching-modal-header">
+                        <h3>Coaching Plan</h3>
+                        <div class="coaching-modal-actions">
+                            <button onclick="downloadCoachingPlan()" title="Download">Download</button>
+                            <button onclick="closeCoachingPlan()" title="Close">Close</button>
+                        </div>
+                    </div>
+                    <div class="coaching-plan">${r.coaching_plan.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')}</div>
+                </div>
+            </div>`;
+        }
 
         contentEl.innerHTML = html;
     } catch (e) {

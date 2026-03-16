@@ -81,6 +81,7 @@ async def interview_websocket(websocket: WebSocket):
         await _safe_send(websocket, {
             "type": "session_started",
             "session_id": gemini_session.session_id,
+            "native_audio": gemini_session._is_native_audio,
         })
 
         audio_chunks_received = 0

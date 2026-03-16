@@ -6,8 +6,8 @@ class Settings(BaseSettings):
     google_application_credentials: str = ""
     gcs_bucket_name: str = "interai-reports"
     gcs_enabled: bool = False
-    gemini_live_model: str = "gemini-2.5-flash-native-audio-preview-12-2025"
-    gemini_chat_model: str = "gemini-3-flash-preview"
+    gemini_live_model: str = "gemini-2.5-flash-native-audio-latest"
+    gemini_chat_model: str = "gemini-2.5-flash"
     host: str = "0.0.0.0"
     port: int = 8080
     local_report_dir: str = "reports"

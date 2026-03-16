@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+import re
 import secrets
 from datetime import datetime, timezone
 
@@ -13,6 +14,18 @@ from app.models.schemas import ExtractedSkills, InterviewReport
 from app.models.db_models import InterviewReportDB, SkillScore, Interview
 
 logger = logging.getLogger(__name__)
+
+
+def _clean_json(text: str) -> str:
+    """Strip markdown fences and sanitize common LLM JSON errors."""
+    text = text.strip()
+    # Remove ```json ... ``` or ``` ... ``` wrappers
+    text = re.sub(r"^```(?:json)?\s*\n?", "", text)
+    text = re.sub(r"\n?```\s*$", "", text)
+    text = text.strip()
+    # Remove trailing commas before } or ]
+    text = re.sub(r",\s*([}\]])", r"\1", text)
+    return text
 
 
 async def generate_report(
@@ -42,18 +55,26 @@ Return a JSON object with these exact fields:
 
 Return ONLY valid JSON, no markdown fences."""
 
-    response = await client.aio.models.generate_content(
-        model=settings.gemini_chat_model,
-        contents=prompt,
+    config = genai.types.GenerateContentConfig(
+        response_mime_type="application/json",
     )
 
-    text = response.text.strip()
-    if text.startswith("```"):
-        text = text.split("\n", 1)[1]
-    if text.endswith("```"):
-        text = text.rsplit("```", 1)[0]
-
-    report_data = json.loads(text.strip())
+    last_error = None
+    for attempt in range(2):
+        response = await client.aio.models.generate_content(
+            model=settings.gemini_chat_model,
+            contents=prompt,
+            config=config,
+        )
+        text = _clean_json(response.text)
+        try:
+            report_data = json.loads(text)
+            break
+        except json.JSONDecodeError as e:
+            last_error = e
+            logger.warning(f"Report JSON parse failed (attempt {attempt + 1}): {e}\nRaw: {text[:500]}")
+    else:
+        raise last_error
 
     return InterviewReport(
         session_id=session_id,
@@ -89,18 +110,25 @@ Return a JSON array where each element has:
 
 Return ONLY valid JSON array, no markdown fences."""
 
-    response = await client.aio.models.generate_content(
-        model=settings.gemini_chat_model,
-        contents=prompt,
+    config = genai.types.GenerateContentConfig(
+        response_mime_type="application/json",
     )
 
-    text = response.text.strip()
-    if text.startswith("```"):
-        text = text.split("\n", 1)[1]
-    if text.endswith("```"):
-        text = text.rsplit("```", 1)[0]
+    last_error = None
+    for attempt in range(2):
+        response = await client.aio.models.generate_content(
+            model=settings.gemini_chat_model,
+            contents=prompt,
+            config=config,
+        )
+        text = _clean_json(response.text)
+        try:
+            return json.loads(text)
+        except json.JSONDecodeError as e:
+            last_error = e
+            logger.warning(f"Skill scores JSON parse failed (attempt {attempt + 1}): {e}\nRaw: {text[:500]}")
 
-    return json.loads(text.strip())
+    raise last_error
 
 
 async def generate_coaching_plan(

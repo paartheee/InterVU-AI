@@ -15,6 +15,7 @@ class InterviewWebSocket {
         this._reconnectDelay = 1000;
         this._intentionalClose = false;
         this._isEnding = false;
+        this._nativeAudio = false;
     }
 
     connect(systemPrompt, extraParams = {}) {
@@ -50,7 +51,8 @@ class InterviewWebSocket {
 
             switch (msg.type) {
                 case 'session_started':
-                    addLogEntry(`Session started: ${msg.session_id.slice(0, 8)}...`, 'info');
+                    this._nativeAudio = !!msg.native_audio;
+                    addLogEntry(`Session started: ${msg.session_id.slice(0, 8)}... (native_audio=${this._nativeAudio})`, 'info');
                     this._startMediaStreaming();
                     if (this.onSessionStarted) this.onSessionStarted(msg.session_id);
                     break;
@@ -80,11 +82,11 @@ class InterviewWebSocket {
 
                 case 'text':
                     addLogEntry(`AI text: ${msg.data.slice(0, 60)}...`, 'ai');
-                    addConversationBubble('wayne', msg.data);
+                    if (typeof addConversationBubble === 'function') addConversationBubble('wayne', msg.data);
                     break;
 
                 case 'user_transcript':
-                    addConversationBubble('user', msg.data);
+                    if (typeof addConversationBubble === 'function') addConversationBubble('user', msg.data);
                     break;
 
                 case 'interview_ended':
@@ -153,6 +155,13 @@ class InterviewWebSocket {
     }
 
     _startMediaStreaming() {
+        // For native-audio models, tell MediaCapture to stream all audio
+        // continuously (including silence) so the model's own VAD can
+        // detect speech boundaries.
+        if (this._nativeAudio) {
+            this.mediaCapture.setNativeAudioMode(true);
+        }
+
         this.mediaCapture.onAudioChunk = (base64Pcm) => {
             if (this.ws && this.ws.readyState === WebSocket.OPEN) {
                 this.ws.send(JSON.stringify({ type: 'audio', data: base64Pcm }));
@@ -162,6 +171,12 @@ class InterviewWebSocket {
 
         this.mediaCapture.onSpeechEnd = () => {
             if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+                if (this._nativeAudio) {
+                    // Native-audio: model handles turn-taking via its own VAD.
+                    // Don't lock input or stop streaming — just log it.
+                    addLogEntry('User speech pause detected (native-audio: model handles turns)', 'info');
+                    return;
+                }
                 this.mediaCapture.lockInput(1800);
                 this.mediaCapture.beginAwaitingModelResponse(8000);
                 this.ws.send(JSON.stringify({ type: 'turn_complete' }));

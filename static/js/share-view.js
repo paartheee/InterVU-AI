@@ -72,11 +72,30 @@ function renderSharedReport(data) {
         html += '</div>';
     }
 
+    html += `
+        <div class="report-actions">
+            ${r.coaching_plan ? '<button class="btn-coaching" onclick="openCoachingPlan()">View Coaching Plan</button>' : ''}
+        </div>
+    </div>`;
+
+    // Coaching plan modal
     if (r.coaching_plan) {
-        html += `<h4>Coaching Plan</h4><div class="coaching-plan">${r.coaching_plan.replace(/\n/g, '<br>')}</div>`;
+        html += `
+        <div id="coaching-modal" class="coaching-modal hidden">
+            <div class="coaching-modal-backdrop" onclick="closeCoachingPlan()"></div>
+            <div class="coaching-modal-content">
+                <div class="coaching-modal-header">
+                    <h3>Coaching Plan</h3>
+                    <div class="coaching-modal-actions">
+                        <button onclick="downloadCoachingPlan()" title="Download">Download</button>
+                        <button onclick="closeCoachingPlan()" title="Close">Close</button>
+                    </div>
+                </div>
+                <div class="coaching-plan">${r.coaching_plan.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')}</div>
+            </div>
+        </div>`;
     }
 
-    html += '</div>';
     container.innerHTML = html;
 }
 

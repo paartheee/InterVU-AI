@@ -19,6 +19,12 @@ class MediaCapture {
         this._isUserSpeaking = false;
         this._lastVoiceAt = 0;
         this._noiseFloor = 0.0;
+        this._nativeAudioMode = false;
+    }
+
+    /** Enable native-audio mode: stream all audio continuously, let model VAD handle turns */
+    setNativeAudioMode(enabled) {
+        this._nativeAudioMode = enabled;
     }
 
     /** Call when AI starts sending audio */
@@ -80,6 +86,24 @@ class MediaCapture {
         this.audioProcessor.onaudioprocess = (event) => {
             if (this._isMuted) return;
 
+            const float32 = event.inputBuffer.getChannelData(0);
+
+            // Native-audio mode: stream ALL audio continuously to Gemini.
+            // The model's own VAD handles turn detection — we only skip
+            // if explicitly muted.
+            if (this._nativeAudioMode) {
+                const int16 = new Int16Array(float32.length);
+                for (let i = 0; i < float32.length; i++) {
+                    int16[i] = Math.max(-32768, Math.min(32767, Math.round(float32[i] * 32767)));
+                }
+                const bytes = new Uint8Array(int16.buffer);
+                const base64 = arrayBufferToBase64(bytes);
+                if (this.onAudioChunk) this.onAudioChunk(base64);
+                return;
+            }
+
+            // --- Non-native-audio: client-side VAD gating ---
+
             // Suppress mic while AI is speaking to prevent echo feedback
             if (this._modelSpeaking) return;
             if (performance.now() < this._echoCooldownUntil) return;
@@ -92,8 +116,6 @@ class MediaCapture {
                 this._awaitingModelResponse = false;
                 this._awaitingModelDeadline = 0;
             }
-
-            const float32 = event.inputBuffer.getChannelData(0);
 
             // Calculate RMS energy
             let sumSq = 0;

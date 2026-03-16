@@ -830,17 +830,6 @@
                 <div class="interview-split">
                     <!-- Left: Video feed + controls -->
                     <div class="interview-main">
-                        <!-- Confidence meter and noise indicator -->
-                        <div class="realtime-indicators">
-                            <div id="confidence-meter-live" class="confidence-meter-live hidden">
-                                <span>Confidence</span>
-                                <div class="meter-bar"><div id="live-confidence-fill" class="meter-fill"></div></div>
-                                <span id="live-confidence-value">--</span>
-                            </div>
-                            <div id="noise-indicator" class="noise-indicator hidden">
-                                <span>Noise:</span> <span id="noise-level">Low</span>
-                            </div>
-                        </div>
 
                         <div class="video-container">
                             <video id="local-video" autoplay muted></video>
@@ -851,8 +840,6 @@
                                 <span id="mic-icon">&#x1F3A4;</span>
                                 <span id="mic-label">Mute</span>
                             </button>
-                            <button id="screen-share-btn" onclick="toggleScreenShare()" class="btn-screen-share" title="Share Screen">Screen Share</button>
-                            <button id="record-btn" onclick="toggleRecording()" class="btn-record" title="Record Session">Record</button>
                             <button id="end-btn" onclick="endInterview()" class="btn-danger">End Interview</button>
                         </div>
                     </div>
