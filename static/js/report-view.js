@@ -22,10 +22,17 @@ async function fetchAndDisplayReport(sessionId, summaryText, skillsJson) {
         const data = await response.json();
         const r = data.report;
 
-        container.innerHTML = `
-            <div class="report-card">
+        // Store share token
+        if (data.share_token) {
+            appState.shareToken = data.share_token;
+        }
+
+        const scoreLevel = r.overall_score >= 7 ? 'good' : r.overall_score >= 5 ? 'warn' : 'critical';
+
+        let html = `
+            <div class="report-card" id="printable-report">
                 <h3>${r.job_title} - Interview Report</h3>
-                <p class="score">Overall Score: <strong>${r.overall_score}/10</strong></p>
+                <p class="score score-level-${scoreLevel}">Overall Score: <strong>${r.overall_score}/10</strong></p>
 
                 <h4>Summary</h4>
                 <p>${r.transcript_summary}</p>
@@ -42,10 +49,60 @@ async function fetchAndDisplayReport(sessionId, summaryText, skillsJson) {
 
                 <h4>Communication</h4>
                 <p>${r.communication_notes}</p>
+        `;
+
+        // Skill-by-skill breakdown
+        if (data.skill_scores && data.skill_scores.length > 0) {
+            html += '<h4>Skill-by-Skill Breakdown</h4><div class="skill-scores">';
+            data.skill_scores.forEach(s => {
+                const scoreClass = s.score >= 7 ? 'score-high' : s.score >= 5 ? 'score-mid' : 'score-low';
+                const itemClass = s.score >= 7 ? 'score-high-item' : s.score >= 5 ? 'score-mid-item' : 'score-low-item';
+                html += `
+                    <div class="skill-score-item ${itemClass}">
+                        <span class="skill-name">${s.skill_name}</span>
+                        <div class="skill-bar">
+                            <div class="skill-fill ${scoreClass}" style="width:${s.score * 10}%"></div>
+                        </div>
+                        <span class="skill-value">${s.score}/10</span>
+                        ${s.notes ? `<p class="skill-notes">${s.notes}</p>` : ''}
+                    </div>
+                `;
+            });
+            html += '</div>';
+        }
+
+        // Coaching plan
+        if (data.coaching_plan) {
+            html += `
+                <h4>Coaching Plan</h4>
+                <div class="coaching-plan">${data.coaching_plan.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')}</div>
+            `;
+        }
+
+        // Action buttons
+        html += `
+                <div class="report-actions">
+                    <button onclick="printReport()">Print / Save PDF</button>
+                    <button onclick="copyShareLink()">Copy Share Link</button>
+                    <button onclick="downloadCoachingPlan()">Download Coaching Plan</button>
+                    ${typeof getRecordingBlob === 'function' ? '<button onclick="downloadRecording()">Download Recording</button>' : ''}
+                    <button onclick="showSection('history')">View History</button>
+                    <button onclick="location.reload()">Start New Interview</button>
+                </div>
 
                 <p class="storage-info">Report saved: ${data.storage_location}</p>
             </div>
         `;
+
+        container.innerHTML = html;
+
+        // Track event
+        if (typeof API !== 'undefined') {
+            API.trackEvent('interview_completed', {
+                session_id: sessionId,
+                overall_score: r.overall_score,
+            });
+        }
     } catch (err) {
         container.innerHTML = '<p class="error">Error generating report: ' + err.message + '</p>';
     }

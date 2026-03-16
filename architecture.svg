@@ -1,0 +1,222 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 750" font-family="'Segoe UI', system-ui, -apple-system, sans-serif">
+  <defs>
+    <filter id="shadow" x="-4%" y="-4%" width="108%" height="108%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.12"/>
+    </filter>
+    <linearGradient id="headerGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#1a73e8"/>
+      <stop offset="100%" stop-color="#4285f4"/>
+    </linearGradient>
+    <linearGradient id="geminiGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#8b5cf6"/>
+      <stop offset="100%" stop-color="#6d28d9"/>
+    </linearGradient>
+    <linearGradient id="gcsGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#34a853"/>
+      <stop offset="100%" stop-color="#1e8e3e"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1100" height="750" rx="12" fill="#f8fafc"/>
+
+  <!-- Title -->
+  <text x="550" y="38" text-anchor="middle" font-size="22" font-weight="700" fill="#1a1a2e">InterVU — Architecture Diagram</text>
+  <text x="550" y="58" text-anchor="middle" font-size="13" fill="#64748b">Real-time AI Mock Interview Platform · Gemini Live Agent Challenge</text>
+
+  <!-- ==================== BROWSER ==================== -->
+  <rect x="30" y="80" width="350" height="220" rx="10" fill="#fff" stroke="#cbd5e1" stroke-width="1.5" filter="url(#shadow)"/>
+  <rect x="30" y="80" width="350" height="36" rx="10" fill="#0f172a"/>
+  <rect x="30" y="106" width="350" height="10" fill="#0f172a"/>
+  <text x="205" y="104" text-anchor="middle" font-size="14" font-weight="600" fill="#fff">Browser (Single-Page App)</text>
+
+  <rect x="50" y="128" width="140" height="36" rx="6" fill="#e0f2fe" stroke="#7dd3fc" stroke-width="1"/>
+  <text x="120" y="150" text-anchor="middle" font-size="11" font-weight="500" fill="#0369a1">Media Capture (A/V)</text>
+
+  <rect x="220" y="128" width="140" height="36" rx="6" fill="#e0f2fe" stroke="#7dd3fc" stroke-width="1"/>
+  <text x="290" y="150" text-anchor="middle" font-size="11" font-weight="500" fill="#0369a1">WebSocket Client</text>
+
+  <rect x="50" y="178" width="140" height="36" rx="6" fill="#e0f2fe" stroke="#7dd3fc" stroke-width="1"/>
+  <text x="120" y="200" text-anchor="middle" font-size="11" font-weight="500" fill="#0369a1">Voice Activity Det.</text>
+
+  <rect x="220" y="178" width="140" height="36" rx="6" fill="#e0f2fe" stroke="#7dd3fc" stroke-width="1"/>
+  <text x="290" y="200" text-anchor="middle" font-size="11" font-weight="500" fill="#0369a1">PCM Audio Player</text>
+
+  <rect x="50" y="228" width="140" height="36" rx="6" fill="#fef3c7" stroke="#fcd34d" stroke-width="1"/>
+  <text x="120" y="250" text-anchor="middle" font-size="11" font-weight="500" fill="#92400e">JD/Resume Upload</text>
+
+  <rect x="220" y="228" width="140" height="36" rx="6" fill="#fef3c7" stroke="#fcd34d" stroke-width="1"/>
+  <text x="290" y="250" text-anchor="middle" font-size="11" font-weight="500" fill="#92400e">Report Viewer</text>
+
+  <!-- ==================== ARROWS: Browser → Backend ==================== -->
+  <!-- WebSocket arrow -->
+  <line x1="380" y1="146" x2="460" y2="146" stroke="#6366f1" stroke-width="2" marker-end="url(#arrowPurple)"/>
+  <line x1="460" y1="146" x2="380" y2="146" stroke="#6366f1" stroke-width="2" stroke-dasharray="6,3"/>
+  <text x="420" y="138" text-anchor="middle" font-size="9" fill="#6366f1" font-weight="600">WebSocket</text>
+  <text x="420" y="160" text-anchor="middle" font-size="8" fill="#6366f1">audio / video / text</text>
+
+  <!-- REST arrow -->
+  <line x1="380" y1="240" x2="460" y2="240" stroke="#0ea5e9" stroke-width="2" marker-end="url(#arrowBlue)"/>
+  <text x="420" y="232" text-anchor="middle" font-size="9" fill="#0ea5e9" font-weight="600">REST API</text>
+  <text x="420" y="254" text-anchor="middle" font-size="8" fill="#0ea5e9">parse-jd / report</text>
+
+  <defs>
+    <marker id="arrowPurple" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6" fill="#6366f1"/>
+    </marker>
+    <marker id="arrowBlue" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6" fill="#0ea5e9"/>
+    </marker>
+    <marker id="arrowGreen" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6" fill="#22c55e"/>
+    </marker>
+    <marker id="arrowViolet" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6" fill="#8b5cf6"/>
+    </marker>
+    <marker id="arrowDown" markerWidth="6" markerHeight="8" refX="3" refY="8" orient="auto">
+      <path d="M0,0 L3,8 L6,0" fill="#8b5cf6"/>
+    </marker>
+  </defs>
+
+  <!-- ==================== CLOUD RUN (Backend) ==================== -->
+  <rect x="460" y="80" width="380" height="380" rx="10" fill="#fff" stroke="#cbd5e1" stroke-width="1.5" filter="url(#shadow)"/>
+  <rect x="460" y="80" width="380" height="36" rx="10" fill="url(#headerGrad)"/>
+  <rect x="460" y="106" width="380" height="10" fill="url(#headerGrad)"/>
+  <text x="650" y="104" text-anchor="middle" font-size="14" font-weight="600" fill="#fff">FastAPI Backend — Google Cloud Run</text>
+
+  <!-- Routers -->
+  <rect x="480" y="128" width="170" height="150" rx="8" fill="#f0fdf4" stroke="#86efac" stroke-width="1"/>
+  <text x="565" y="148" text-anchor="middle" font-size="12" font-weight="600" fill="#166534">Routers</text>
+  <text x="495" y="168" font-size="10" fill="#15803d">POST /api/parse-jd</text>
+  <text x="495" y="184" font-size="10" fill="#15803d">WS   /ws/interview</text>
+  <text x="495" y="200" font-size="10" fill="#15803d">POST /api/report</text>
+  <text x="495" y="216" font-size="10" fill="#15803d">GET  /api/profile</text>
+  <text x="495" y="232" font-size="10" fill="#15803d">GET  /api/history</text>
+  <text x="495" y="248" font-size="10" fill="#15803d">GET  /api/analytics</text>
+  <text x="495" y="264" font-size="10" fill="#15803d">POST /api/share</text>
+
+  <!-- Services -->
+  <rect x="660" y="128" width="160" height="150" rx="8" fill="#faf5ff" stroke="#d8b4fe" stroke-width="1"/>
+  <text x="740" y="148" text-anchor="middle" font-size="12" font-weight="600" fill="#581c87">Services</text>
+  <text x="675" y="168" font-size="10" fill="#7e22ce">GeminiLiveSession</text>
+  <text x="675" y="184" font-size="10" fill="#7e22ce">JD Service</text>
+  <text x="675" y="200" font-size="10" fill="#7e22ce">Resume Service</text>
+  <text x="675" y="216" font-size="10" fill="#7e22ce">Prompt Builder</text>
+  <text x="675" y="232" font-size="10" fill="#7e22ce">Report Service</text>
+  <text x="675" y="248" font-size="10" fill="#7e22ce">Confidence Service</text>
+  <text x="675" y="264" font-size="10" fill="#7e22ce">Skill Gap Service</text>
+
+  <!-- Database -->
+  <rect x="480" y="300" width="170" height="50" rx="8" fill="#fff7ed" stroke="#fdba74" stroke-width="1"/>
+  <text x="565" y="322" text-anchor="middle" font-size="11" font-weight="600" fill="#9a3412">SQLite Database</text>
+  <text x="565" y="338" text-anchor="middle" font-size="9" fill="#c2410c">Profiles, History, Analytics</text>
+
+  <!-- LangChain -->
+  <rect x="660" y="300" width="160" height="50" rx="8" fill="#fef2f2" stroke="#fca5a5" stroke-width="1"/>
+  <text x="740" y="322" text-anchor="middle" font-size="11" font-weight="600" fill="#991b1b">LangChain</text>
+  <text x="740" y="338" text-anchor="middle" font-size="9" fill="#b91c1c">langchain-google-genai</text>
+
+  <!-- Local Reports -->
+  <rect x="480" y="365" width="170" height="40" rx="8" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1"/>
+  <text x="565" y="390" text-anchor="middle" font-size="10" fill="#475569">Local /reports/ (fallback)</text>
+
+  <!-- GenAI SDK label -->
+  <rect x="660" y="365" width="160" height="40" rx="8" fill="#ede9fe" stroke="#a78bfa" stroke-width="1"/>
+  <text x="740" y="390" text-anchor="middle" font-size="10" font-weight="500" fill="#5b21b6">Google GenAI SDK</text>
+
+  <!-- ==================== GOOGLE CLOUD SERVICES ==================== -->
+
+  <!-- Gemini Live API -->
+  <rect x="880" y="100" width="190" height="110" rx="10" fill="url(#geminiGrad)" filter="url(#shadow)"/>
+  <text x="975" y="128" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">Gemini Live API</text>
+  <text x="975" y="148" text-anchor="middle" font-size="10" fill="#e9d5ff">gemini-2.5-flash-native</text>
+  <text x="975" y="163" text-anchor="middle" font-size="10" fill="#e9d5ff">-audio-preview</text>
+  <text x="975" y="183" text-anchor="middle" font-size="9" fill="#c4b5fd">Real-time audio/video</text>
+  <text x="975" y="196" text-anchor="middle" font-size="9" fill="#c4b5fd">streaming + transcription</text>
+
+  <!-- Arrow: Backend → Gemini Live -->
+  <line x1="840" y1="155" x2="878" y2="155" stroke="#8b5cf6" stroke-width="2" marker-end="url(#arrowViolet)"/>
+  <line x1="878" y1="165" x2="840" y2="165" stroke="#8b5cf6" stroke-width="2" stroke-dasharray="6,3"/>
+
+  <!-- Gemini Chat API -->
+  <rect x="880" y="230" width="190" height="100" rx="10" fill="url(#geminiGrad)" filter="url(#shadow)"/>
+  <text x="975" y="258" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">Gemini Chat API</text>
+  <text x="975" y="278" text-anchor="middle" font-size="10" fill="#e9d5ff">gemini-3-flash-preview</text>
+  <text x="975" y="303" text-anchor="middle" font-size="9" fill="#c4b5fd">JD/Resume parsing</text>
+  <text x="975" y="316" text-anchor="middle" font-size="9" fill="#c4b5fd">Report generation</text>
+
+  <!-- Arrow: Backend → Gemini Chat -->
+  <line x1="840" y1="280" x2="878" y2="280" stroke="#8b5cf6" stroke-width="2" marker-end="url(#arrowViolet)"/>
+
+  <!-- GCS -->
+  <rect x="880" y="350" width="190" height="90" rx="10" fill="url(#gcsGrad)" filter="url(#shadow)"/>
+  <text x="975" y="378" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">Google Cloud Storage</text>
+  <text x="975" y="398" text-anchor="middle" font-size="10" fill="#bbf7d0">Bucket: interai-reports</text>
+  <text x="975" y="420" text-anchor="middle" font-size="9" fill="#86efac">Interview reports (JSON)</text>
+
+  <!-- Arrow: Backend → GCS -->
+  <line x1="840" y1="395" x2="878" y2="395" stroke="#22c55e" stroke-width="2" marker-end="url(#arrowGreen)"/>
+
+  <!-- ==================== DATA FLOW ==================== -->
+  <rect x="30" y="490" width="1040" height="240" rx="10" fill="#fff" stroke="#cbd5e1" stroke-width="1.5" filter="url(#shadow)"/>
+  <rect x="30" y="490" width="1040" height="36" rx="10" fill="#1e293b"/>
+  <rect x="30" y="516" width="1040" height="10" fill="#1e293b"/>
+  <text x="550" y="514" text-anchor="middle" font-size="14" font-weight="600" fill="#fff">Data Flow</text>
+
+  <!-- Step 1 -->
+  <rect x="55" y="540" width="300" height="80" rx="8" fill="#dbeafe" stroke="#93c5fd" stroke-width="1"/>
+  <text x="70" y="560" font-size="12" font-weight="700" fill="#1e40af">1. Setup</text>
+  <text x="70" y="578" font-size="10" fill="#1e3a8a">User uploads JD + Resume</text>
+  <text x="70" y="593" font-size="10" fill="#1e3a8a">→ POST /api/parse-jd</text>
+  <text x="70" y="608" font-size="10" fill="#1e3a8a">→ Parallel extraction via Gemini Chat</text>
+
+  <!-- Arrow 1→2 -->
+  <line x1="357" y1="580" x2="395" y2="580" stroke="#475569" stroke-width="1.5" marker-end="url(#arrowGray)"/>
+  <defs>
+    <marker id="arrowGray" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6" fill="#475569"/>
+    </marker>
+  </defs>
+
+  <!-- Step 2 -->
+  <rect x="400" y="540" width="300" height="80" rx="8" fill="#ede9fe" stroke="#c4b5fd" stroke-width="1"/>
+  <text x="415" y="560" font-size="12" font-weight="700" fill="#5b21b6">2. Live Interview</text>
+  <text x="415" y="578" font-size="10" fill="#6b21a8">WebSocket /ws/interview opened</text>
+  <text x="415" y="593" font-size="10" fill="#6b21a8">→ GeminiLiveSession streams A/V</text>
+  <text x="415" y="608" font-size="10" fill="#6b21a8">→ Real-time transcription + analysis</text>
+
+  <!-- Arrow 2→3 -->
+  <line x1="702" y1="580" x2="740" y2="580" stroke="#475569" stroke-width="1.5" marker-end="url(#arrowGray)"/>
+
+  <!-- Step 3 -->
+  <rect x="745" y="540" width="300" height="80" rx="8" fill="#dcfce7" stroke="#86efac" stroke-width="1"/>
+  <text x="760" y="560" font-size="12" font-weight="700" fill="#166534">3. Report</text>
+  <text x="760" y="578" font-size="10" fill="#15803d">Interview ends → POST /api/report</text>
+  <text x="760" y="593" font-size="10" fill="#15803d">→ Gemini Chat generates scored report</text>
+  <text x="760" y="608" font-size="10" fill="#15803d">→ Saved to GCS / local fallback</text>
+
+  <!-- Key features row -->
+  <rect x="55" y="638" width="220" height="70" rx="8" fill="#fefce8" stroke="#fde047" stroke-width="1"/>
+  <text x="165" y="658" text-anchor="middle" font-size="11" font-weight="600" fill="#854d0e">Key Features</text>
+  <text x="70" y="676" font-size="9" fill="#92400e">- Barge-in / interruption support</text>
+  <text x="70" y="690" font-size="9" fill="#92400e">- Client-side VAD with echo suppression</text>
+  <text x="70" y="704" font-size="9" fill="#92400e">- Silence watchdog (auto turn-complete)</text>
+
+  <rect x="295" y="638" width="220" height="70" rx="8" fill="#fefce8" stroke="#fde047" stroke-width="1"/>
+  <text x="405" y="658" text-anchor="middle" font-size="11" font-weight="600" fill="#854d0e">AI Interviewer "Wayne"</text>
+  <text x="310" y="676" font-size="9" fill="#92400e">- 3-state behavior engine</text>
+  <text x="310" y="690" font-size="9" fill="#92400e">- Adapts to JD + resume context</text>
+  <text x="310" y="704" font-size="9" fill="#92400e">- Video analysis (body language)</text>
+
+  <rect x="535" y="638" width="220" height="70" rx="8" fill="#fefce8" stroke="#fde047" stroke-width="1"/>
+  <text x="645" y="658" text-anchor="middle" font-size="11" font-weight="600" fill="#854d0e">Report Generation</text>
+  <text x="550" y="676" font-size="9" fill="#92400e">- Structured skill scoring</text>
+  <text x="550" y="690" font-size="9" fill="#92400e">- Confidence analysis</text>
+  <text x="550" y="704" font-size="9" fill="#92400e">- Skill gap identification</text>
+
+  <rect x="775" y="638" width="220" height="70" rx="8" fill="#fefce8" stroke="#fde047" stroke-width="1"/>
+  <text x="885" y="658" text-anchor="middle" font-size="11" font-weight="600" fill="#854d0e">Google Cloud</text>
+  <text x="790" y="676" font-size="9" fill="#92400e">- GenAI SDK (google-genai)</text>
+  <text x="790" y="690" font-size="9" fill="#92400e">- Cloud Run hosting</text>
+  <text x="790" y="704" font-size="9" fill="#92400e">- GCS report storage</text>
+</svg>

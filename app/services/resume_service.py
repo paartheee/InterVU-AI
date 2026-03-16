@@ -6,13 +6,16 @@ async def parse_resume(resume_text: str) -> ParsedResume:
     structured_llm = get_llm().with_structured_output(ParsedResume)
 
     prompt = (
-        "Analyze this resume and extract:\n"
-        "- The candidate's name\n"
-        "- Total years of professional experience\n"
-        "- All technical skills mentioned\n"
-        "- Key projects or work experiences (one-line summaries, max 5)\n"
-        "- Highest education level and field\n\n"
-        f"Resume:\n{resume_text}"
+        "You are an expert resume analyzer.\n\n"
+        "Extract structured information from the resume below.\n"
+        "Return ONLY valid JSON matching the schema.\n\n"
+        f"Resume:\n{resume_text}\n\n"
+        "Rules:\n"
+        "- skills should include all major technical skills.\n"
+        "- programming_languages must only include programming languages.\n"
+        "- frameworks should include ML/Backend/Frontend frameworks.\n"
+        "- projects must contain short project titles only (max 5).\n"
+        "- Do not hallucinate. Only extract from the provided resume text.\n"
     )
 
     result = await structured_llm.ainvoke(prompt)

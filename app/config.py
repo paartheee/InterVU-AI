@@ -11,6 +11,10 @@ class Settings(BaseSettings):
     host: str = "0.0.0.0"
     port: int = 8080
     local_report_dir: str = "reports"
+    database_url: str = "sqlite+aiosqlite:///./interai.db"
+    rate_limit_per_minute: int = 30
+    default_interview_duration: int = 30
+    max_recording_chunks: int = 500
 
     class Config:
         env_file = ".env"

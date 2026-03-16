@@ -63,6 +63,7 @@ class MediaCapture {
         });
 
         this.videoElement = document.getElementById('local-video');
+        this.videoElement.setAttribute('playsinline', '');
         this.videoElement.srcObject = this.stream;
 
         // Audio capture: Float32 -> Int16 PCM at 16kHz
@@ -109,6 +110,12 @@ class MediaCapture {
                 } else {
                     this._noiseFloor = this._noiseFloor * 0.95 + rms * 0.05;
                 }
+            }
+
+            // Emit noise level for the indicator
+            if (typeof computeNoiseLevel === 'function') {
+                const noiseDb = computeNoiseLevel(rms, this._noiseFloor);
+                updateNoiseIndicator(noiseDb);
             }
 
             const dynamicThreshold = Math.max(

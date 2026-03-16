@@ -11,29 +11,41 @@
     <!-- Toast notification container -->
     <div id="toast-container"></div>
 
+    <!-- Fullscreen analysis overlay -->
+    <div id="analysis-overlay" class="analysis-overlay hidden">
+        <div class="analysis-overlay-card">
+            <div class="analysis-spinner"></div>
+            <h2 class="analysis-overlay-title">Preparing Your Interview</h2>
+            <div id="analysis-overlay-steps" class="analysis-overlay-steps"></div>
+            <p class="analysis-overlay-hint">This usually takes a few seconds...</p>
+        </div>
+    </div>
+
     <!-- ============ LANDING PAGE ============ -->
     <div id="landing-page">
         <!-- Animated Random Needle Lines Background -->
         <canvas id="needle-canvas" class="needle-canvas"></canvas>
-        <nav class="landing-nav">
-            <div class="nav-brand">InterVU</div>
-            <div class="nav-links">
-                <a href="#features">Features</a>
-                <a href="#how-it-works">How It Works</a>
-                <button class="nav-cta" onclick="enterApp()">Try Now</button>
-            </div>
-        </nav>
+        <div class="landing-nav-wrap">
+            <nav class="landing-nav">
+                <div class="nav-brand">InterVU</div>
+                <div class="nav-links">
+                    <a href="#features">Features</a>
+                    <a href="#how-it-works">How It Works</a>
+                    <button class="nav-cta" onclick="enterApp()">Try Now</button>
+                </div>
+            </nav>
+        </div>
 
         <!-- Hero -->
         <section class="hero">
             <div class="hero-bg-grid"></div>
             <div class="hero-content">
-                <div class="hero-badge">AI-Powered Mock Interviews</div>
-                <h1>Ace Real Interviews with<br>AI That <span class="gradient-text">Coaches You Live</span></h1>
+                <h1>Nail Your Next Interview.<br class="hero-br"><span class="gradient-text">Get Real-Time AI Coaching.</span></h1>
+                <p class="hero-desc">Practice with an AI interviewer that listens, watches, and coaches you — so you walk in confident and ready.</p>
                 <ul class="hero-bullets">
-                    <li><span class="bullet-icon">&#x1F399;</span> Real-time AI interviewer that listens &amp; responds</li>
-                    <li><span class="bullet-icon">&#x1F440;</span> Voice + body language feedback via webcam</li>
-                    <li><span class="bullet-icon">&#x26A1;</span> Instant improvement tips in 14 languages</li>
+                    <li><span class="bullet-icon"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="7" y="2" width="6" height="10" rx="3" fill="rgba(13,148,136,0.15)" stroke="#0d9488" stroke-width="1.5"/><path d="M5 10v1a5 5 0 0 0 10 0v-1" stroke="#0891b2" stroke-width="1.5" stroke-linecap="round" fill="none"/><line x1="10" y1="16" x2="10" y2="18" stroke="#0d9488" stroke-width="1.5" stroke-linecap="round"/></svg></span> Speaks &amp; listens — no typing, just real conversation</li>
+                    <li><span class="bullet-icon"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 4C5 4 1.5 10 1.5 10S5 16 10 16s8.5-6 8.5-6S15 4 10 4z" fill="rgba(13,148,136,0.1)" stroke="#0d9488" stroke-width="1.5" stroke-linecap="round"/><circle cx="10" cy="10" r="3" fill="rgba(8,145,178,0.15)" stroke="#0891b2" stroke-width="1.5"/></svg></span> Reads your body language and confidence via webcam</li>
+                    <li><span class="bullet-icon"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 2l2.5 5h5.5l-4.5 3.5 1.7 5.5L10 13l-5.2 3 1.7-5.5L2 7h5.5L10 2z" fill="rgba(255,193,7,0.15)" stroke="#E5A700" stroke-width="1.5" stroke-linejoin="round"/></svg></span> Get instant improvement tips in 14 languages</li>
                 </ul>
                 <div class="hero-actions">
                     <button class="btn-primary-lg" onclick="enterApp()">
@@ -45,7 +57,7 @@
                 <p class="hero-trust">No signup required &bull; 5-minute session &bull; 100% free</p>
                 <div class="hero-stats">
                     <div class="hero-stat">
-                        <span class="hero-stat-icon">&#x1F9E0;</span>
+                        <span class="hero-stat-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 2C7 2 3 6 3 11c0 3 1.5 5.5 4 7v3h10v-3c2.5-1.5 4-4 4-7 0-5-4-9-9-9z" fill="rgba(13,148,136,0.12)" stroke="#0d9488" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="9" cy="10" r="1.5" fill="#0891b2"/><circle cx="15" cy="10" r="1.5" fill="#0891b2"/></svg></span>
                         <div>
                             <span class="hero-stat-value">3</span>
                             <span class="hero-stat-label">AI Evaluation Modes</span>
@@ -53,7 +65,7 @@
                     </div>
                     <div class="hero-stat-divider"></div>
                     <div class="hero-stat">
-                        <span class="hero-stat-icon">&#x1F30D;</span>
+                        <span class="hero-stat-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" fill="rgba(13,148,136,0.10)" stroke="#0d9488" stroke-width="1.5"/><ellipse cx="12" cy="12" rx="4" ry="9" fill="none" stroke="#0891b2" stroke-width="1" opacity="0.6"/><line x1="3" y1="12" x2="21" y2="12" stroke="#0891b2" stroke-width="1" opacity="0.4"/></svg></span>
                         <div>
                             <span class="hero-stat-value">14</span>
                             <span class="hero-stat-label">Coaching Languages</span>
@@ -61,7 +73,7 @@
                     </div>
                     <div class="hero-stat-divider"></div>
                     <div class="hero-stat">
-                        <span class="hero-stat-icon">&#x1F4E1;</span>
+                        <span class="hero-stat-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="4" fill="rgba(13,148,136,0.12)" stroke="#0d9488" stroke-width="1.5"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4" stroke="#0891b2" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/><path d="M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M5.6 18.4l2.8-2.8M15.6 8.4l2.8-2.8" stroke="#0891b2" stroke-width="1" stroke-linecap="round" opacity="0.3"/></svg></span>
                         <div>
                             <span class="hero-stat-value">Real-time</span>
                             <span class="hero-stat-label">Voice + Vision AI</span>
@@ -85,12 +97,12 @@
                                 <svg class="mockup-cam-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
                                     <defs>
                                         <linearGradient id="gemini-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                                            <stop offset="0%" style="stop-color:#4285F4;stop-opacity:1"/>
-                                            <stop offset="100%" style="stop-color:#DB4437;stop-opacity:1"/>
+                                            <stop offset="0%" stop-color="#4285F4" stop-opacity="1"/>
+                                            <stop offset="100%" stop-color="#DB4437" stop-opacity="1"/>
                                         </linearGradient>
                                         <linearGradient id="sparkle-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                                            <stop offset="0%" style="stop-color:#8AB4F8;stop-opacity:1"/>
-                                            <stop offset="100%" style="stop-color:#F28B82;stop-opacity:1"/>
+                                            <stop offset="0%" stop-color="#8AB4F8" stop-opacity="1"/>
+                                            <stop offset="100%" stop-color="#F28B82" stop-opacity="1"/>
                                         </linearGradient>
                                     </defs>
                                     <path d="M20 20 H70" stroke="#14b8a6" stroke-width="4" stroke-linecap="round"/>
@@ -110,12 +122,12 @@
                                         <circle cx="210" cy="230" r="60" fill="#76db87"/>
                                     </g>
                                     <g id="interaction-bubble">
-                                        <path d="M240,80 L440,80 C462.09,80 480,97.91 480,120 L480,260 C480,282.09 462.09,300 440,300 L320,300 L260,360 L260,300 L240,300 C217.91,300 200,282.09 200,260 L200,120 C200,97.91 217.91,80 240,80 Z" fill="#FFFFFF" stroke="#E8EAED" stroke-width="8" transform="translate(14, -81) scale(0.6)" style="transform-box: fill-box; transform-origin: center center;"/>
+                                        <path d="M240,80 L440,80 C462.09,80 480,97.91 480,120 L480,260 C480,282.09 462.09,300 440,300 L320,300 L260,360 L260,300 L240,300 C217.91,300 200,282.09 200,260 L200,120 C200,97.91 217.91,80 240,80 Z" fill="#FFFFFF" stroke="#E8EAED" stroke-width="8" transform="translate(14, -81) scale(0.6)" class="svg-center-transform"/>
                                         <g transform="translate(260, 130) scale(0.8)">
-                                            <path d="M100,0 C100,55.23 144.77,100 200,100 C144.77,100 100,144.77 100,200 C100,144.77 55.23,100 0,100 C55.23,100 100,55.23 100,0 Z" fill="url(#gemini-gradient)" transform="translate(16, -105) scale(0.7)" style="transform-box: fill-box; transform-origin: center center;">
+                                            <path d="M100,0 C100,55.23 144.77,100 200,100 C144.77,100 100,144.77 100,200 C100,144.77 55.23,100 0,100 C55.23,100 100,55.23 100,0 Z" fill="url(#gemini-gradient)" transform="translate(16, -105) scale(0.7)" class="svg-center-transform">
                                                 <animateTransform attributeName="transform" type="translate" values="0,0; 0,-10; 0,0" dur="2s" repeatCount="indefinite" calcMode="spline" keySplines="0.4 0 0.2 1; 0.4 0 0.2 1" additive="sum"/>
                                             </path>
-                                            <path d="M180,20 C180,42.09 197.91,60 220,60 C197.91,60 180,77.91 180,100 C180,77.91 162.09,60 140,60 C162.09,60 180,42.09 180,20 Z" fill="url(#sparkle-gradient)" opacity="0.9" transform="translate(-8, -122) scale(0.6)" style="transform-box: fill-box; transform-origin: center center;">
+                                            <path d="M180,20 C180,42.09 197.91,60 220,60 C197.91,60 180,77.91 180,100 C180,77.91 162.09,60 140,60 C162.09,60 180,42.09 180,20 Z" fill="url(#sparkle-gradient)" opacity="0.9" transform="translate(-8, -122) scale(0.6)" class="svg-center-transform">
                                                 <animateTransform attributeName="transform" type="translate" values="0,0; 0,-10; 0,0" dur="2s" repeatCount="indefinite" calcMode="spline" keySplines="0.4 0 0.2 1; 0.4 0 0.2 1" additive="sum"/>
                                             </path>
                                         </g>
@@ -133,17 +145,17 @@
                                 </div>
                                 <div class="confidence-meter">
                                     <span class="meter-label">Confidence</span>
-                                    <div class="meter-bar"><div class="meter-fill" style="width: 62%"></div></div>
+                                    <div class="meter-bar"><div class="meter-fill"></div></div>
                                     <span class="meter-value">62%</span>
                                 </div>
                                 <div class="confidence-meter">
                                     <span class="meter-label">Eye Contact</span>
-                                    <div class="meter-bar"><div class="meter-fill meter-warn" style="width: 38%"></div></div>
+                                    <div class="meter-bar"><div class="meter-fill meter-warn"></div></div>
                                     <span class="meter-value meter-warn-text">38%</span>
                                 </div>
                                 <div class="confidence-meter">
                                     <span class="meter-label">Clarity</span>
-                                    <div class="meter-bar"><div class="meter-fill" style="width: 71%"></div></div>
+                                    <div class="meter-bar"><div class="meter-fill"></div></div>
                                     <span class="meter-value">71%</span>
                                 </div>
                             </div>
@@ -164,6 +176,28 @@
             </div>
         </section>
 
+        <!-- Social Proof — immediately after hero for trust -->
+        <div class="proof-strip proof-strip-hero">
+            <div class="section-container">
+                <div class="proof-strip-inner">
+                    <div class="proof-item">
+                        <span class="proof-value">87%</span>
+                        <span class="proof-label">increase in confidence after just 3 sessions</span>
+                    </div>
+                    <div class="proof-divider"></div>
+                    <div class="proof-item">
+                        <span class="proof-value">2,300+</span>
+                        <span class="proof-label">mock interviews completed on the platform</span>
+                    </div>
+                    <div class="proof-divider"></div>
+                    <div class="proof-item">
+                        <span class="proof-value">120</span>
+                        <span class="proof-label">companies' engineers prep with InterVU</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Features -->
         <section id="features" class="features-section">
             <div class="section-container">
@@ -176,7 +210,7 @@
                 <!-- 3-State AI Brain — Full-width hero feature -->
                 <div class="feature-brain">
                     <div class="brain-header">
-                        <span class="brain-icon">&#x1F9E0;</span>
+                        <span class="brain-icon"><svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M18 4C11 4 5 10 5 17c0 4.5 2.5 8.5 6 11v4h14v-4c3.5-2.5 6-6.5 6-11 0-7-6-13-13-13z" fill="rgba(13,148,136,0.12)"/><path d="M18 4C11 4 5 10 5 17c0 4.5 2.5 8.5 6 11v4h14v-4c3.5-2.5 6-6.5 6-11 0-7-6-13-13-13z" stroke="#0d9488" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="M13 17a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm10 0a2 2 0 1 0 0-4 2 2 0 0 0 0 4z" fill="#0891b2"/><path d="M12 21c1.5 2 3.5 3 6 3s4.5-1 6-3" stroke="#0891b2" stroke-width="2" stroke-linecap="round" fill="none"/><path d="M11 32h14M14 36h8" stroke="#0d9488" stroke-width="2" stroke-linecap="round"/></svg></span>
                         <h3>3-State Adaptive AI Brain</h3>
                         <p>Wayne doesn't follow a script. He reads you in real time and shifts strategy.</p>
                     </div>
@@ -211,7 +245,15 @@
                 <div class="features-hero-grid">
                     <div class="feature-card feature-hero-card">
                         <div class="feature-card-icon-row">
-                            <span class="feature-icon-lg">&#x1F441;</span>
+                            <span class="feature-icon-lg icon-vision">
+                                <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M20 8C10 8 3 20 3 20s7 12 17 12 17-12 17-12-7-12-17-12z" fill="rgba(13,148,136,0.10)"/>
+                                    <path d="M20 8C10 8 3 20 3 20s7 12 17 12 17-12 17-12-7-12-17-12z" stroke="#0d9488" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                                    <circle cx="20" cy="20" r="6" fill="rgba(8,145,178,0.15)" stroke="#0891b2" stroke-width="2"/>
+                                    <circle class="vision-pupil" cx="20" cy="20" r="2.5" fill="#0d9488"/>
+                                    <line class="vision-scan" x1="6" y1="20" x2="34" y2="20" stroke="#14b8a6" stroke-width="1.5" stroke-dasharray="3 3" opacity="0.5"/>
+                                </svg>
+                            </span>
                             <span class="feature-live-badge"><span class="live-dot-sm"></span> Live</span>
                         </div>
                         <h3>Real-Time Vision</h3>
@@ -224,18 +266,27 @@
                     </div>
                     <div class="feature-card feature-hero-card">
                         <div class="feature-card-icon-row">
-                            <span class="feature-icon-lg">&#x270B;</span>
+                            <span class="feature-icon-lg icon-interrupt">
+                                <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <rect x="8" y="14" width="24" height="16" rx="3" fill="rgba(239,68,68,0.08)" stroke="#ef4444" stroke-width="2"/>
+                                    <line class="interrupt-slash" x1="8" y1="30" x2="32" y2="14" stroke="#ef4444" stroke-width="2.5" stroke-linecap="round"/>
+                                    <!-- Sound waves being cut -->
+                                    <path class="interrupt-wave interrupt-wave-1" d="M3 18c0-3 2-6 2-6" stroke="#0d9488" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+                                    <path class="interrupt-wave interrupt-wave-2" d="M0 16c0-4 3-8 3-8" stroke="#0d9488" stroke-width="1.5" stroke-linecap="round" fill="none" opacity="0.5"/>
+                                    <path class="interrupt-wave interrupt-wave-3" d="M37 18c0 3-2 6-2 6" stroke="#94a3b8" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+                                </svg>
+                            </span>
                         </div>
                         <h3>Smart Interruptions</h3>
                         <p>Cuts you mid-answer when you're vague, off-topic, or losing confidence — exactly like a tough real interviewer.</p>
                         <div class="feature-waveform">
-                            <div class="wave-bar" style="height: 12px"></div>
-                            <div class="wave-bar" style="height: 20px"></div>
-                            <div class="wave-bar" style="height: 28px"></div>
-                            <div class="wave-bar" style="height: 16px"></div>
-                            <div class="wave-bar" style="height: 8px"></div>
-                            <div class="wave-bar wave-bar-cut" style="height: 4px"></div>
-                            <div class="wave-bar wave-bar-cut" style="height: 2px"></div>
+                            <div class="wave-bar"></div>
+                            <div class="wave-bar"></div>
+                            <div class="wave-bar"></div>
+                            <div class="wave-bar"></div>
+                            <div class="wave-bar"></div>
+                            <div class="wave-bar wave-bar-cut"></div>
+                            <div class="wave-bar wave-bar-cut"></div>
                         </div>
                     </div>
                 </div>
@@ -243,27 +294,27 @@
                 <!-- Secondary features — smaller grid -->
                 <div class="features-secondary-grid">
                     <div class="feature-card feature-sm">
-                        <div class="feature-icon">&#x1F3A4;</div>
+                        <div class="feature-icon"><svg width="32" height="32" viewBox="0 0 32 32" fill="none"><rect x="12" y="4" width="8" height="16" rx="4" fill="rgba(13,148,136,0.12)" stroke="#0d9488" stroke-width="2"/><path d="M8 16v2a8 8 0 0 0 16 0v-2" stroke="#0891b2" stroke-width="2" stroke-linecap="round" fill="none"/><line x1="16" y1="26" x2="16" y2="30" stroke="#0d9488" stroke-width="2" stroke-linecap="round"/><line x1="12" y1="30" x2="20" y2="30" stroke="#0d9488" stroke-width="2" stroke-linecap="round"/></svg></div>
                         <h3>Voice Interview</h3>
                         <p>No text boxes. Speak naturally — Gemini processes audio in real time and responds with voice.</p>
                     </div>
                     <div class="feature-card feature-sm">
-                        <div class="feature-icon">&#x1F4C4;</div>
+                        <div class="feature-icon"><svg width="32" height="32" viewBox="0 0 32 32" fill="none"><rect x="6" y="4" width="20" height="26" rx="3" fill="rgba(13,148,136,0.12)" stroke="#0d9488" stroke-width="2"/><line x1="10" y1="10" x2="22" y2="10" stroke="#0891b2" stroke-width="2" stroke-linecap="round"/><line x1="10" y1="15" x2="22" y2="15" stroke="#0891b2" stroke-width="2" stroke-linecap="round" opacity="0.6"/><line x1="10" y1="20" x2="18" y2="20" stroke="#0891b2" stroke-width="2" stroke-linecap="round" opacity="0.4"/><circle cx="24" cy="24" r="6" fill="rgba(255,127,80,0.12)" stroke="#FF7F50" stroke-width="2"/><path d="M22 24l1.5 1.5 3-3" stroke="#FF7F50" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg></div>
                         <h3>Resume Cross-Check</h3>
                         <p>Wayne verifies your resume claims against the JD — probing gaps and inconsistencies live.</p>
                     </div>
                     <div class="feature-card feature-sm">
-                        <div class="feature-icon">&#x1F4CA;</div>
+                        <div class="feature-icon"><svg width="32" height="32" viewBox="0 0 32 32" fill="none"><rect x="4" y="12" width="6" height="16" rx="1" fill="rgba(229,167,0,0.15)" stroke="#E5A700" stroke-width="2"/><rect x="13" y="8" width="6" height="20" rx="1" fill="rgba(13,148,136,0.12)" stroke="#0d9488" stroke-width="2"/><rect x="22" y="4" width="6" height="24" rx="1" fill="rgba(22,163,74,0.12)" stroke="#16a34a" stroke-width="2"/></svg></div>
                         <h3>Gap Analysis</h3>
                         <p>Predicts your weak areas before the interview starts and drills you until you're strong.</p>
                     </div>
                     <div class="feature-card feature-sm">
-                        <div class="feature-icon">&#x1F4DD;</div>
+                        <div class="feature-icon"><svg width="32" height="32" viewBox="0 0 32 32" fill="none"><rect x="4" y="4" width="24" height="24" rx="4" fill="rgba(13,148,136,0.12)" stroke="#0d9488" stroke-width="2"/><path d="M10 16l4 4 8-8" stroke="#0891b2" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/><line x1="4" y1="10" x2="28" y2="10" stroke="#0d9488" stroke-width="1.5" opacity="0.3"/></svg></div>
                         <h3>Detailed Report</h3>
                         <p>Confidence score, filler words, STAR structure rating, technical depth — all scored.</p>
                     </div>
                     <div class="feature-card feature-sm">
-                        <div class="feature-icon">&#x1F30D;</div>
+                        <div class="feature-icon"><svg width="32" height="32" viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="12" fill="rgba(13,148,136,0.10)" stroke="#0d9488" stroke-width="2"/><ellipse cx="16" cy="16" rx="5" ry="12" fill="none" stroke="#0891b2" stroke-width="1.5" opacity="0.6"/><line x1="4" y1="16" x2="28" y2="16" stroke="#0891b2" stroke-width="1.5" opacity="0.4"/><circle cx="16" cy="16" r="2" fill="#FF7F50"/></svg></div>
                         <h3>14-Language Coaching</h3>
                         <p>Get improvement tips in your native language while answering in English.</p>
                     </div>
@@ -292,23 +343,7 @@
                     </div>
                 </div>
 
-                <!-- Proof layer -->
-                <div class="proof-strip">
-                    <div class="proof-item">
-                        <span class="proof-value">87%</span>
-                        <span class="proof-label">users improved confidence in 3 sessions</span>
-                    </div>
-                    <div class="proof-divider"></div>
-                    <div class="proof-item">
-                        <span class="proof-value">2,300+</span>
-                        <span class="proof-label">mock interviews completed</span>
-                    </div>
-                    <div class="proof-divider"></div>
-                    <div class="proof-item">
-                        <span class="proof-value">120</span>
-                        <span class="proof-label">companies' engineers use InterVU</span>
-                    </div>
-                </div>
+                <!-- Proof layer moved to hero section -->
 
                 <!-- Transition CTA -->
                 <div class="section-transition">
@@ -338,13 +373,13 @@
                         <div class="step-card" data-step="1">
                             <div class="step-number">01</div>
                             <div class="step-content">
-                                <h3>Paste JD + Resume</h3>
-                                <p>AI extracts required skills, predicts interview questions, and identifies your weak spots before you begin.</p>
+                                <h3>Tailor Your Prep</h3>
+                                <p>Upload your JD and resume. AI extracts required skills, predicts interview questions, and spots your weak areas before you begin.</p>
                                 <div class="step-visual step-visual-match">
                                     <div class="match-meter">
                                         <div class="match-label">Skill Match</div>
                                         <div class="match-bar-track">
-                                            <div class="match-bar-fill" style="width: 72%"></div>
+                                            <div class="match-bar-fill"></div>
                                         </div>
                                         <div class="match-value">72%</div>
                                     </div>
@@ -366,14 +401,14 @@
                             <div class="step-hero-badge">&#x2B50; Core Experience</div>
                             <div class="step-number">02</div>
                             <div class="step-content">
-                                <h3>Live Interview with Wayne</h3>
-                                <p>Wayne watches your confidence, interrupts weak answers, probes deeper, and evaluates you like a real interviewer.</p>
+                                <h3>Simulate the Interview</h3>
+                                <p>Chat live with Wayne. He watches your confidence, interrupts weak answers, probes deeper, and evaluates you like a real interviewer.</p>
                                 <div class="step-visual step-visual-live">
                                     <div class="step-live-row">
                                         <div class="step-confidence">
                                             <div class="conf-label">Confidence</div>
                                             <div class="conf-bar-track">
-                                                <div class="conf-bar-fill" style="width: 62%"></div>
+                                                <div class="conf-bar-fill"></div>
                                             </div>
                                             <div class="conf-value">62%</div>
                                         </div>
@@ -399,8 +434,8 @@
                         <div class="step-card" data-step="3">
                             <div class="step-number">03</div>
                             <div class="step-content">
-                                <h3>Get Your Report</h3>
-                                <p>Receive a detailed breakdown with confidence score, weak areas, filler words, and exact steps to improve.</p>
+                                <h3>Review Your Performance</h3>
+                                <p>Get actionable feedback: confidence score, weak areas, filler word count, and exact steps to improve before the real thing.</p>
                                 <div class="step-visual step-visual-report">
                                     <div class="report-metric-row">
                                         <div class="report-metric">
@@ -441,34 +476,43 @@
                 <div class="persona-grid">
                     <div class="persona-info">
                         <span class="section-tag">Meet Your Interviewer</span>
-                        <h2>Wayne</h2>
-                        <p class="persona-title">Senior Engineering Manager &bull; 15 Years &bull; Top-Tier Tech</p>
-                        <p class="persona-desc">
+
+                        <!-- Role toggle tabs -->
+                        <div class="persona-role-tabs" id="persona-role-tabs">
+                            <button type="button" class="persona-tab active" data-role="engineering">Engineering</button>
+                            <button type="button" class="persona-tab" data-role="product">Product</button>
+                            <button type="button" class="persona-tab" data-role="sales">Sales</button>
+                            <button type="button" class="persona-tab" data-role="hr">HR</button>
+                        </div>
+
+                        <h2 class="persona-name" id="persona-name">Wayne</h2>
+                        <p class="persona-title" id="persona-title-text">Senior Engineering Manager &bull; 15 Years &bull; Top-Tier Tech</p>
+                        <p class="persona-desc" id="persona-desc-text">
                             Wayne is not your friendly chatbot. A no-nonsense engineering leader who values
                             clarity, technical depth, and professionalism. He'll challenge your assumptions,
                             probe your knowledge gaps, and ensure you're camera-ready for the real thing.
                         </p>
-                        <p class="persona-trust-line">
+                        <p class="persona-trust-line" id="persona-trust-text">
                             <span class="trust-check">&#x2713;</span>
-                            Trained on real engineering interview patterns
+                            <span id="persona-trust-label">Trained on real engineering interview patterns</span>
                         </p>
                         <div class="persona-traits">
                             <div class="trait">
-                                <span class="trait-icon">&#x1F50D;</span>
+                                <span class="trait-icon"><svg width="28" height="28" viewBox="0 0 28 28" fill="none"><circle cx="14" cy="12" r="8" fill="rgba(239,68,68,0.08)" stroke="#ef4444" stroke-width="2"/><line x1="20" y1="18" x2="25" y2="23" stroke="#ef4444" stroke-width="2.5" stroke-linecap="round"/><circle cx="14" cy="12" r="3" fill="none" stroke="#ef4444" stroke-width="1.5" opacity="0.5"/></svg></span>
                                 <div>
                                     <strong>The Interrogator</strong>
                                     <p>Tests depth, clarity, and real experience.</p>
                                 </div>
                             </div>
                             <div class="trait">
-                                <span class="trait-icon">&#x1F440;</span>
+                                <span class="trait-icon"><svg width="28" height="28" viewBox="0 0 28 28" fill="none"><path d="M14 6C7 6 2 14 2 14s5 8 12 8 12-8 12-8-5-8-12-8z" fill="rgba(245,158,11,0.08)" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" fill-rule="evenodd"/><circle cx="14" cy="14" r="4" fill="rgba(245,158,11,0.15)" stroke="#f59e0b" stroke-width="2"/><circle cx="14" cy="14" r="1.5" fill="#f59e0b"/></svg></span>
                                 <div>
                                     <strong>The Observer</strong>
                                     <p>Tracks confidence, eye contact, and engagement.</p>
                                 </div>
                             </div>
                             <div class="trait">
-                                <span class="trait-icon">&#x1F393;</span>
+                                <span class="trait-icon"><svg width="28" height="28" viewBox="0 0 28 28" fill="none"><path d="M14 3L3 9v4c0 7.5 4.7 14.5 11 16 6.3-1.5 11-8.5 11-16V9L14 3z" fill="rgba(22,163,74,0.08)" stroke="#16a34a" stroke-width="2" stroke-linejoin="round"/><path d="M10 14l3 3 6-6" stroke="#16a34a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg></span>
                                 <div>
                                     <strong>The Tutor</strong>
                                     <p>Identifies weaknesses and fixes them immediately.</p>
@@ -479,7 +523,32 @@
                     <div class="persona-visual">
                         <div class="persona-avatar">
                             <div class="avatar-circle">
-                                <span>W</span>
+                                <svg class="avatar-face" width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <!-- Head shape -->
+                                    <ellipse cx="50" cy="48" rx="32" ry="36" fill="rgba(255,255,255,0.25)"/>
+                                    <!-- Hair / top -->
+                                    <path d="M22 38c0-18 12-28 28-28s28 10 28 28" stroke="rgba(255,255,255,0.6)" stroke-width="3" fill="none" stroke-linecap="round"/>
+                                    <path d="M20 40c2-20 14-30 30-30s28 10 30 30" stroke="rgba(255,255,255,0.3)" stroke-width="6" fill="none" stroke-linecap="round"/>
+                                    <!-- Eyes -->
+                                    <ellipse cx="38" cy="44" rx="4" ry="4.5" fill="white"/>
+                                    <ellipse class="wayne-eye-left" cx="39" cy="44" rx="2" ry="2.5" fill="#134e4a"/>
+                                    <ellipse cx="62" cy="44" rx="4" ry="4.5" fill="white"/>
+                                    <ellipse class="wayne-eye-right" cx="63" cy="44" rx="2" ry="2.5" fill="#134e4a"/>
+                                    <!-- Eyebrows (slightly stern) -->
+                                    <path d="M32 37l10-2" stroke="rgba(255,255,255,0.8)" stroke-width="2.5" stroke-linecap="round"/>
+                                    <path d="M58 35l10 2" stroke="rgba(255,255,255,0.8)" stroke-width="2.5" stroke-linecap="round"/>
+                                    <!-- Nose -->
+                                    <path d="M50 48v8" stroke="rgba(255,255,255,0.4)" stroke-width="1.5" stroke-linecap="round"/>
+                                    <!-- Mouth (confident smirk) -->
+                                    <path class="wayne-mouth" d="M40 62c3 4 7 5 10 5s7-1 10-5" stroke="white" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+                                    <!-- Glasses -->
+                                    <rect x="30" y="38" width="16" height="13" rx="3" stroke="rgba(255,255,255,0.7)" stroke-width="1.5" fill="none"/>
+                                    <rect x="54" y="38" width="16" height="13" rx="3" stroke="rgba(255,255,255,0.7)" stroke-width="1.5" fill="none"/>
+                                    <line x1="46" y1="44" x2="54" y2="44" stroke="rgba(255,255,255,0.5)" stroke-width="1.5"/>
+                                    <!-- Collar / tie hint -->
+                                    <path d="M36 78l14 8 14-8" stroke="rgba(255,255,255,0.4)" stroke-width="2" stroke-linecap="round" fill="none"/>
+                                    <line x1="50" y1="78" x2="50" y2="90" stroke="rgba(255,255,255,0.3)" stroke-width="2" stroke-linecap="round"/>
+                                </svg>
                             </div>
                             <div class="avatar-ring"></div>
                             <div class="avatar-thinking">
@@ -533,84 +602,248 @@
             </div>
         </header>
 
+        <!-- App Navigation -->
+        <nav id="app-nav" class="app-nav hidden">
+            <button onclick="showSection('jd')" data-nav="jd" class="nav-active">New Interview</button>
+            <button onclick="showSection('history')" data-nav="history">History</button>
+            <button onclick="showSection('analytics')" data-nav="analytics">Analytics</button>
+            <button onclick="showSection('profile')" data-nav="profile">Profile</button>
+        </nav>
+
         <main>
-            <!-- Phase 1: JD + Resume Input -->
+            <!-- Phase 1: 3-Step Guided Workflow -->
             <section id="jd-section" class="active">
-                <div class="input-grid">
-                    <div class="input-card">
-                        <h2>Job Description</h2>
-                        <div class="upload-row">
-                            <label class="file-upload-btn" for="jd-file">
-                                <span>Upload File</span>
-                                <input type="file" id="jd-file" accept=".txt,.pdf,.doc,.docx" onchange="handleFileUpload(this, 'jd-input')">
-                            </label>
-                            <span class="upload-hint">or paste below</span>
-                        </div>
-                        <textarea id="jd-input" rows="14"
-                            placeholder="Paste the full job description here..."></textarea>
+                <!-- Step Progress Indicator -->
+                <div class="wizard-progress">
+                    <div class="wizard-step active" data-step="1">
+                        <div class="wizard-step-circle">1</div>
+                        <span class="wizard-step-label">Upload</span>
                     </div>
-                    <div class="input-card">
-                        <h2>Your Resume <span class="optional-tag">Optional</span></h2>
-                        <div class="upload-row">
-                            <label class="file-upload-btn" for="resume-file">
-                                <span>Upload File</span>
-                                <input type="file" id="resume-file" accept=".txt,.pdf,.doc,.docx" onchange="handleFileUpload(this, 'resume-input')">
-                            </label>
-                            <span class="upload-hint">or paste below</span>
-                        </div>
-                        <textarea id="resume-input" rows="14"
-                            placeholder="Paste your resume text here for cross-referencing..."></textarea>
+                    <div class="wizard-step-line"></div>
+                    <div class="wizard-step" data-step="2">
+                        <div class="wizard-step-circle">2</div>
+                        <span class="wizard-step-label">Review</span>
+                    </div>
+                    <div class="wizard-step-line"></div>
+                    <div class="wizard-step" data-step="3">
+                        <div class="wizard-step-circle">3</div>
+                        <span class="wizard-step-label">Configure</span>
                     </div>
                 </div>
 
-                <div class="jd-options">
-                    <label for="lang-select">Coaching Language:</label>
-                    <select id="lang-select">
-                        <option value="English" selected>English</option>
-                        <option value="Tamil">Tamil</option>
-                        <option value="Hindi">Hindi</option>
-                        <option value="Telugu">Telugu</option>
-                        <option value="Kannada">Kannada</option>
-                        <option value="Malayalam">Malayalam</option>
-                        <option value="Spanish">Spanish</option>
-                        <option value="French">French</option>
-                        <option value="Mandarin">Mandarin</option>
-                        <option value="Japanese">Japanese</option>
-                        <option value="Korean">Korean</option>
-                        <option value="Arabic">Arabic</option>
-                        <option value="Portuguese">Portuguese</option>
-                        <option value="German">German</option>
-                    </select>
+                <!-- ===== STEP 1: Upload Inputs ===== -->
+                <div id="wizard-step-1" class="wizard-panel">
+                    <div class="wizard-panel-header">
+                        <h2>Upload Your Inputs</h2>
+                        <p class="wizard-subtitle">Provide the job description and optionally your resume for personalized preparation</p>
+                    </div>
+                    <div class="input-grid">
+                        <div class="input-card">
+                            <h2>Job Description</h2>
+                            <div class="upload-row">
+                                <label class="file-upload-btn" for="jd-file">
+                                    <span>Upload File</span>
+                                    <input type="file" id="jd-file" accept=".txt,.pdf,.doc,.docx" onchange="handleFileUpload(this, 'jd-input')">
+                                </label>
+                                <span class="upload-hint">or paste below</span>
+                            </div>
+                            <div class="rich-textarea-wrap">
+                                <div id="jd-input" class="rich-textarea" contenteditable="true" data-placeholder="Paste the full job description here..."></div>
+                            </div>
+                        </div>
+                        <div class="input-card">
+                            <h2>Your Resume <span class="optional-tag">Optional</span></h2>
+                            <div class="upload-row">
+                                <label class="file-upload-btn" for="resume-file">
+                                    <span>Upload File</span>
+                                    <input type="file" id="resume-file" accept=".txt,.pdf,.doc,.docx" onchange="handleFileUpload(this, 'resume-input')">
+                                </label>
+                                <span class="upload-hint">or paste below</span>
+                            </div>
+                            <div class="rich-textarea-wrap">
+                                <div id="resume-input" class="rich-textarea" contenteditable="true" data-placeholder="Paste your resume text here for cross-referencing..."></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="jd-options">
+                        <label for="lang-select">Coaching Language:</label>
+                        <select id="lang-select">
+                            <option value="English" selected>English</option>
+                            <option value="Tamil">Tamil</option>
+                            <option value="Hindi">Hindi</option>
+                            <option value="Telugu">Telugu</option>
+                            <option value="Kannada">Kannada</option>
+                            <option value="Malayalam">Malayalam</option>
+                            <option value="Spanish">Spanish</option>
+                            <option value="French">French</option>
+                            <option value="Mandarin">Mandarin</option>
+                            <option value="Japanese">Japanese</option>
+                            <option value="Korean">Korean</option>
+                            <option value="Arabic">Arabic</option>
+                            <option value="Portuguese">Portuguese</option>
+                            <option value="German">German</option>
+                        </select>
+                    </div>
+
+                    <button id="parse-btn" onclick="parseJD()">Analyze &amp; Prepare Interview</button>
                 </div>
 
-                <button id="parse-btn" onclick="parseJD()">Analyze &amp; Prepare Interview</button>
+                <!-- ===== STEP 2: AI Extracted Information ===== -->
+                <div id="wizard-step-2" class="wizard-panel hidden">
+                    <div class="wizard-panel-header">
+                        <h2>AI Extracted Information</h2>
+                        <p class="wizard-subtitle">Review the skills and gaps detected from your inputs</p>
+                    </div>
 
-                <div id="skills-display" class="hidden">
+                    <!-- Detected Role Banner -->
+                    <div id="detected-role-banner" class="detected-role-banner">
+                        <span class="role-label">Detected Role</span>
+                        <span id="detected-role-title" class="role-title"></span>
+                        <span id="detected-seniority" class="role-seniority"></span>
+                    </div>
+
                     <div class="analysis-grid">
+                        <!-- JD Required Skills -->
                         <div class="analysis-card">
-                            <h3>JD Requirements</h3>
-                            <div id="skills-content"></div>
+                            <h3>Required Skills</h3>
+                            <div id="required-skills-tags" class="skill-tags"></div>
                         </div>
+                        <!-- JD Preferred Skills -->
+                        <div class="analysis-card">
+                            <h3>Preferred Skills</h3>
+                            <div id="preferred-skills-tags" class="skill-tags"></div>
+                        </div>
+                        <!-- Tools & Technologies -->
+                        <div class="analysis-card">
+                            <h3>Tools &amp; Technologies</h3>
+                            <div id="tools-tags" class="skill-tags"></div>
+                        </div>
+                        <!-- Resume Skills (shown only if resume provided) -->
                         <div id="resume-display" class="analysis-card hidden">
-                            <h3>Resume Profile</h3>
+                            <h3>Your Resume Skills</h3>
                             <div id="resume-content"></div>
                         </div>
                     </div>
+
+                    <!-- Skill Gap Analysis (from LLM) -->
                     <div id="gap-analysis" class="hidden">
-                        <h3>Gap Analysis</h3>
+                        <h3>Skill Gap Analysis</h3>
                         <div id="gap-content"></div>
                     </div>
-                    <button id="start-btn" onclick="startInterview()">Start Interview with Wayne</button>
+
+                    <!-- Responsibilities -->
+                    <div id="responsibilities-section" class="analysis-card responsibilities-card hidden">
+                        <h3>Key Responsibilities</h3>
+                        <ul id="responsibilities-list"></ul>
+                    </div>
+
+                    <div class="wizard-actions">
+                        <button class="btn-secondary" onclick="wizardGoTo(1)">Back to Upload</button>
+                        <button class="btn-start-interview" onclick="wizardGoTo(3)">Continue to Setup</button>
+                    </div>
+                </div>
+
+                <!-- ===== STEP 3: Interview Configuration ===== -->
+                <div id="wizard-step-3" class="wizard-panel hidden">
+                    <div class="wizard-panel-header">
+                        <h2>Interview Configuration</h2>
+                        <p class="wizard-subtitle">Customize your mock interview experience</p>
+                    </div>
+
+                    <!-- Role summary -->
+                    <div id="config-role-summary" class="config-role-summary"></div>
+
+                    <div id="interview-config" class="interview-config">
+                        <h3>Interview Settings</h3>
+                        <div class="config-grid">
+                            <label>Type:
+                                <select id="interview-type">
+                                    <option value="mixed">Mixed</option>
+                                    <option value="behavioral">Behavioral</option>
+                                    <option value="technical">Technical</option>
+                                    <option value="system_design">System Design</option>
+                                </select>
+                            </label>
+                            <label>Difficulty:
+                                <select id="difficulty-level">
+                                    <option value="junior">Junior</option>
+                                    <option value="mid" selected>Mid-Level</option>
+                                    <option value="senior">Senior</option>
+                                </select>
+                            </label>
+                            <label>Duration:
+                                <select id="duration-select">
+                                    <option value="15">15 min</option>
+                                    <option value="30" selected>30 min</option>
+                                    <option value="45">45 min</option>
+                                    <option value="60">60 min</option>
+                                </select>
+                            </label>
+                            <label>Follow-up Depth:
+                                <select id="followup-depth">
+                                    <option value="1">Shallow</option>
+                                    <option value="2" selected>Normal</option>
+                                    <option value="3">Deep</option>
+                                </select>
+                            </label>
+                            <label>Company Style:
+                                <select id="company-style">
+                                    <option value="">Default</option>
+                                    <option value="faang_behavioral">FAANG Behavioral</option>
+                                    <option value="faang_technical">FAANG Technical</option>
+                                    <option value="startup_technical">Startup Technical</option>
+                                    <option value="consulting">Consulting Case</option>
+                                </select>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="wizard-actions">
+                        <button class="btn-secondary" onclick="wizardGoTo(2)">Back to Review</button>
+                        <button id="start-btn" class="btn-start-interview" onclick="startInterview()">Start Interview with Wayne</button>
+                    </div>
                 </div>
             </section>
 
-            <!-- Phase 2: Live Interview (No Text Box — voice & vision only) -->
+            <!-- Question Preview Section -->
+            <section id="questions-section" class="hidden">
+                <h2>Likely Interview Questions</h2>
+                <div id="questions-content"></div>
+                <div class="report-actions">
+                    <button onclick="showSection('jd')">Back to Setup</button>
+                    <button onclick="startInterview()">Start Interview</button>
+                </div>
+            </section>
+
+            <!-- Phase 2: Live Interview -->
             <section id="interview-section" class="hidden">
+                <!-- Floating round timer (top-right) -->
+                <div id="interview-timer" class="round-timer hidden">
+                    <svg class="timer-ring" viewBox="0 0 80 80">
+                        <circle class="timer-ring-bg" cx="40" cy="40" r="34"/>
+                        <circle id="timer-ring-fill" class="timer-ring-fill" cx="40" cy="40" r="34"/>
+                    </svg>
+                    <span id="timer-display" class="timer-display">30:00</span>
+                </div>
+
                 <div class="interview-split">
                     <!-- Left: Video feed + controls -->
                     <div class="interview-main">
+                        <!-- Confidence meter and noise indicator -->
+                        <div class="realtime-indicators">
+                            <div id="confidence-meter-live" class="confidence-meter-live hidden">
+                                <span>Confidence</span>
+                                <div class="meter-bar"><div id="live-confidence-fill" class="meter-fill"></div></div>
+                                <span id="live-confidence-value">--</span>
+                            </div>
+                            <div id="noise-indicator" class="noise-indicator hidden">
+                                <span>Noise:</span> <span id="noise-level">Low</span>
+                            </div>
+                        </div>
+
                         <div class="video-container">
-                            <video id="local-video" autoplay muted playsinline></video>
+                            <video id="local-video" autoplay muted></video>
                             <div id="status-indicator">Connecting...</div>
                         </div>
                         <div class="controls">
@@ -618,39 +851,80 @@
                                 <span id="mic-icon">&#x1F3A4;</span>
                                 <span id="mic-label">Mute</span>
                             </button>
+                            <button id="screen-share-btn" onclick="toggleScreenShare()" class="btn-screen-share" title="Share Screen">Screen Share</button>
+                            <button id="record-btn" onclick="toggleRecording()" class="btn-record" title="Record Session">Record</button>
                             <button id="end-btn" onclick="endInterview()" class="btn-danger">End Interview</button>
                         </div>
                     </div>
 
-                    <!-- Right: Live processing log -->
-                    <div class="log-panel">
-                        <h3>Live Processing</h3>
-                        <div id="log-content">
-                            <div class="log-entry log-info">Waiting for connection...</div>
-                        </div>
-                        <div class="log-stats">
-                            <div class="stat">
-                                <span class="stat-label">Audio Chunks</span>
-                                <span id="stat-audio" class="stat-value">0</span>
-                            </div>
-                            <div class="stat">
-                                <span class="stat-label">Video Frames</span>
-                                <span id="stat-video" class="stat-value">0</span>
-                            </div>
-                            <div class="stat">
-                                <span class="stat-label">AI Responses</span>
-                                <span id="stat-responses" class="stat-value">0</span>
-                            </div>
+                    <!-- Right: Live conversation transcript -->
+                    <div class="conversation-panel">
+                        <h3>Live Conversation</h3>
+                        <div id="conversation-feed" class="conversation-feed">
+                            <div class="conv-status">Waiting for Wayne to start...</div>
                         </div>
                     </div>
                 </div>
+
+                <!-- Hidden log panel (keeps stats working) -->
+                <div id="log-content" class="sr-only"></div>
+                <span id="stat-audio" class="sr-only">0</span>
+                <span id="stat-video" class="sr-only">0</span>
+                <span id="stat-responses" class="sr-only">0</span>
             </section>
 
             <!-- Phase 3: Report -->
             <section id="report-section" class="hidden">
                 <h2>Interview Report</h2>
                 <div id="report-content"></div>
-                <button onclick="location.reload()">Start New Interview</button>
+            </section>
+
+            <!-- History Dashboard -->
+            <section id="history-section" class="hidden">
+                <h2>Interview History</h2>
+                <div id="history-filters">
+                    <input type="text" id="history-search" placeholder="Filter by job title..." oninput="filterHistory(this.value)">
+                </div>
+                <div id="history-list"></div>
+                <div id="history-detail" class="hidden">
+                    <div id="history-report-content"></div>
+                    <div id="history-transcript" class="hidden">
+                        <h3>Full Transcript</h3>
+                        <div id="transcript-content"></div>
+                    </div>
+                    <div id="history-comparison" class="hidden">
+                        <h3>Progress Over Time</h3>
+                        <canvas id="comparison-chart" width="600" height="300"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Analytics Dashboard -->
+            <section id="analytics-section" class="hidden">
+                <h2>Analytics Dashboard</h2>
+                <div class="analytics-cards">
+                    <div class="analytics-card" id="stat-total-interviews"></div>
+                    <div class="analytics-card" id="stat-avg-score"></div>
+                    <div class="analytics-card" id="stat-completion-rate"></div>
+                </div>
+                <div id="stat-by-type" class="analytics-types"></div>
+                <div class="analytics-charts">
+                    <canvas id="score-trend-chart" width="600" height="300"></canvas>
+                    <canvas id="skill-breakdown-chart" width="400" height="300"></canvas>
+                </div>
+            </section>
+
+            <!-- Profile -->
+            <section id="profile-section" class="hidden">
+                <h2>Your Profile</h2>
+                <div class="profile-form">
+                    <label>Display Name: <input type="text" id="profile-name" placeholder="Your name"></label>
+                    <label>Target Roles (comma-separated): <input type="text" id="profile-roles" placeholder="e.g. Software Engineer, Data Scientist"></label>
+                    <label>Default Resume:
+                        <textarea id="profile-resume" rows="8" placeholder="Paste your default resume here..."></textarea>
+                    </label>
+                    <button onclick="saveProfile()">Save Profile</button>
+                </div>
             </section>
         </main>
     </div>
@@ -659,10 +933,79 @@
     <script src="/js/toast.js"></script>
     <script src="/js/log-panel.js"></script>
     <script src="/js/audio-player.js"></script>
+    <script src="/js/confidence-meter.js"></script>
     <script src="/js/media-capture.js"></script>
     <script src="/js/websocket-client.js"></script>
+    <script src="/js/db-client.js"></script>
+    <script src="/js/chart-utils.js"></script>
+    <script src="/js/interview-config.js"></script>
+    <script src="/js/timer.js"></script>
     <script src="/js/jd-parser.js"></script>
     <script src="/js/report-view.js"></script>
+    <script src="/js/screen-share.js"></script>
+    <script src="/js/recording.js"></script>
+    <script src="/js/question-preview.js"></script>
+    <script src="/js/history-dashboard.js"></script>
+    <script src="/js/analytics-dashboard.js"></script>
+    <script src="/js/profile-manager.js"></script>
+    <script src="/js/share-view.js"></script>
     <script src="/js/app.js"></script>
+
+    <!-- Persona role tab switcher -->
+    <script>
+    (function() {
+        const personas = {
+            engineering: {
+                name: 'Wayne',
+                title: 'Senior Engineering Manager \u2022 15 Years \u2022 Top-Tier Tech',
+                desc: 'Wayne is not your friendly chatbot. A no-nonsense engineering leader who values clarity, technical depth, and professionalism. He\u2019ll challenge your assumptions, probe your knowledge gaps, and ensure you\u2019re camera-ready for the real thing.',
+                trust: 'Trained on real engineering interview patterns',
+            },
+            product: {
+                name: 'Maya',
+                title: 'Director of Product \u2022 12 Years \u2022 B2B & Consumer SaaS',
+                desc: 'Maya thinks in frameworks. She\u2019ll push you on prioritization, metrics that matter, and stakeholder trade-offs. Expect pointed questions about your decision-making process and how you ship outcomes\u2014not just features.',
+                trust: 'Trained on real product management interview patterns',
+            },
+            sales: {
+                name: 'Derek',
+                title: 'VP of Sales \u2022 18 Years \u2022 Enterprise & Mid-Market',
+                desc: 'Derek has closed eight-figure deals and expects you to think on your feet. He\u2019ll drill into your pipeline strategy, objection handling, and ability to articulate value under pressure\u2014just like a live prospect would.',
+                trust: 'Trained on real sales & account executive interview patterns',
+            },
+            hr: {
+                name: 'Priya',
+                title: 'Head of People \u2022 10 Years \u2022 Scaling Startups to IPO',
+                desc: 'Priya evaluates culture fit, leadership potential, and how you handle ambiguity. She\u2019ll explore your collaboration style, conflict resolution, and whether your values align with the team\u2019s mission.',
+                trust: 'Trained on real behavioral & culture-fit interview patterns',
+            },
+        };
+
+        const tabContainer = document.getElementById('persona-role-tabs');
+        if (!tabContainer) return;
+
+        tabContainer.addEventListener('click', function(e) {
+            const tab = e.target.closest('.persona-tab');
+            if (!tab) return;
+
+            const role = tab.dataset.role;
+            const data = personas[role];
+            if (!data) return;
+
+            tabContainer.querySelectorAll('.persona-tab').forEach(function(t) { t.classList.remove('active'); });
+            tab.classList.add('active');
+
+            var nameEl = document.getElementById('persona-name');
+            var titleEl = document.getElementById('persona-title-text');
+            var descEl = document.getElementById('persona-desc-text');
+            var trustEl = document.getElementById('persona-trust-label');
+
+            if (nameEl) nameEl.textContent = data.name;
+            if (titleEl) titleEl.innerHTML = data.title;
+            if (descEl) descEl.textContent = data.desc;
+            if (trustEl) trustEl.textContent = data.trust;
+        });
+    })();
+    </script>
 </body>
 </html>

@@ -1,25 +1,38 @@
 import os
 import logging
 
-from fastapi import FastAPI, File, UploadFile
+from fastapi import FastAPI, File, UploadFile, Request
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
 
 from app.config import settings
-from app.routers import jd_parser, interview, report
+from app.database import init_db
+from app.routers import jd_parser, interview, report, profile, history, analytics, questions, share
 
 logger = logging.getLogger(__name__)
 
-app = FastAPI(title="InterAI", version="0.1.0")
+limiter = Limiter(key_func=get_remote_address)
+app = FastAPI(title="InterAI", version="0.2.0")
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # Register API routers before the static file catch-all
 app.include_router(jd_parser.router, prefix="/api")
 app.include_router(interview.router)
 app.include_router(report.router, prefix="/api")
+app.include_router(profile.router, prefix="/api")
+app.include_router(history.router, prefix="/api")
+app.include_router(analytics.router, prefix="/api")
+app.include_router(questions.router, prefix="/api")
+app.include_router(share.router, prefix="/api")
 
 
 @app.post("/api/extract-text")
-async def extract_text(file: UploadFile = File(...)):
+@limiter.limit(f"{settings.rate_limit_per_minute}/minute")
+async def extract_text(request: Request, file: UploadFile = File(...)):
     """Extract text from uploaded files (PDF, TXT, DOC, DOCX)."""
     content = await file.read()
     filename = file.filename or ""
@@ -27,10 +40,8 @@ async def extract_text(file: UploadFile = File(...)):
     if filename.endswith(".txt"):
         text = content.decode("utf-8", errors="ignore")
     elif filename.endswith(".pdf"):
-        # Basic PDF text extraction — pull readable ASCII/UTF-8 strings
         text = _extract_pdf_text(content)
     else:
-        # Best-effort for .doc/.docx
         text = content.decode("utf-8", errors="ignore")
         text = "".join(c if c.isprintable() or c in "\n\r\t" else " " for c in text)
         import re
@@ -55,6 +66,10 @@ def _extract_pdf_text(data: bytes) -> str:
 
 @app.on_event("startup")
 async def startup_checks():
+    # Initialize database
+    await init_db()
+    logger.info("Database initialized.")
+
     # Always ensure local fallback path exists
     os.makedirs(settings.local_report_dir, exist_ok=True)
 
@@ -92,14 +107,11 @@ async def startup_checks():
         client = gcs.Client(credentials=credentials, project=project_id)
         bucket = client.bucket(settings.gcs_bucket_name)
 
-        if not bucket.exists():
-            logger.warning(
-                "GCS_ENABLED=true but bucket '%s' is not accessible. "
-                "Using local fallback '%s'.",
-                settings.gcs_bucket_name,
-                settings.local_report_dir,
-            )
-            return
+        # Probe with a lightweight object write/delete instead of bucket.exists()
+        # (avoids requiring storage.buckets.get which writer accounts often lack)
+        probe_blob = bucket.blob(".intervu_preflight_probe")
+        probe_blob.upload_from_string(b"", content_type="application/octet-stream")
+        probe_blob.delete()
 
         logger.info(
             "GCS preflight successful. Project='%s', bucket='%s', ADC='%s'.",

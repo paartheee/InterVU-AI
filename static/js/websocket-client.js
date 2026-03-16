@@ -9,6 +9,7 @@ class InterviewWebSocket {
 
         // Reconnection state
         this._systemPrompt = null;
+        this._extraStartParams = {};
         this._reconnectAttempts = 0;
         this._maxReconnectAttempts = 5;
         this._reconnectDelay = 1000;
@@ -16,8 +17,9 @@ class InterviewWebSocket {
         this._isEnding = false;
     }
 
-    connect(systemPrompt) {
+    connect(systemPrompt, extraParams = {}) {
         this._systemPrompt = systemPrompt;
+        this._extraStartParams = extraParams;
         this._intentionalClose = false;
         this._isEnding = false;
         this._openWebSocket();
@@ -39,6 +41,7 @@ class InterviewWebSocket {
             this.ws.send(JSON.stringify({
                 type: 'start',
                 system_prompt: this._systemPrompt,
+                ...this._extraStartParams,
             }));
         };
 
@@ -56,7 +59,6 @@ class InterviewWebSocket {
                     const pcmBytes = Uint8Array.from(
                         atob(msg.data), c => c.charCodeAt(0)
                     );
-                    // Suppress mic while AI is speaking (echo prevention)
                     this.mediaCapture.setModelSpeaking(true);
                     this.audioPlayer.enqueue(pcmBytes);
                     updateStat('responses');
@@ -67,15 +69,22 @@ class InterviewWebSocket {
                     this.mediaCapture.setModelSpeaking(false);
                     this.audioPlayer.clearBuffer();
                     addLogEntry('AI INTERRUPTED (user speaking)', 'interrupt');
+                    if (typeof finalizeWayneBubble === 'function') finalizeWayneBubble();
                     break;
 
                 case 'turn_complete':
                     this.mediaCapture.setModelSpeaking(false);
                     addLogEntry('AI turn complete', 'ai');
+                    if (typeof finalizeWayneBubble === 'function') finalizeWayneBubble();
                     break;
 
                 case 'text':
                     addLogEntry(`AI text: ${msg.data.slice(0, 60)}...`, 'ai');
+                    addConversationBubble('wayne', msg.data);
+                    break;
+
+                case 'user_transcript':
+                    addConversationBubble('user', msg.data);
                     break;
 
                 case 'interview_ended':
@@ -83,8 +92,24 @@ class InterviewWebSocket {
                     this._handleInterviewEnded(msg);
                     break;
 
+                case 'timer_update':
+                    if (typeof updateTimerFromServer === 'function') {
+                        updateTimerFromServer(msg.remaining_seconds);
+                    }
+                    break;
+
+                case 'time_up':
+                    showToast('Time is up! Wayne is wrapping up...', 'warning');
+                    addLogEntry('Interview time limit reached', 'info');
+                    break;
+
+                case 'confidence_update':
+                    if (typeof updateConfidenceMeter === 'function') {
+                        updateConfidenceMeter(msg.score);
+                    }
+                    break;
+
                 case 'log':
-                    // Backend processing log — display in log panel
                     addLogEntry(`[server] ${msg.data}`, msg.level || 'info');
                     break;
 
@@ -106,7 +131,6 @@ class InterviewWebSocket {
                 return;
             }
 
-            // Unexpected close — attempt reconnection
             if (this._reconnectAttempts < this._maxReconnectAttempts) {
                 this._reconnectAttempts++;
                 const delay = this._reconnectDelay * Math.pow(2, this._reconnectAttempts - 1);
@@ -142,6 +166,7 @@ class InterviewWebSocket {
                 this.mediaCapture.beginAwaitingModelResponse(8000);
                 this.ws.send(JSON.stringify({ type: 'turn_complete' }));
                 addLogEntry('User turn complete detected', 'info');
+                if (typeof showTypingIndicator === 'function') showTypingIndicator();
             }
         };
 

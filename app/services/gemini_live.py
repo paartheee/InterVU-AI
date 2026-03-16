@@ -33,7 +33,6 @@ class GeminiLiveSession:
         self._last_audio_time: float = 0
         self._audio_started = False  # True once user has sent at least one chunk
         self._model_speaking = False  # True while model is generating a turn
-        self._activity_open = False
 
     async def connect(self):
         config = types.LiveConnectConfig(
@@ -48,11 +47,8 @@ class GeminiLiveSession:
                     )
                 )
             ),
-            realtime_input_config=types.RealtimeInputConfig(
-                automatic_activity_detection=types.AutomaticActivityDetection(
-                    disabled=True,
-                ),
-            ),
+            input_audio_transcription=types.AudioTranscriptionConfig(),
+            output_audio_transcription=types.AudioTranscriptionConfig(),
         )
 
         self._ctx = self.client.aio.live.connect(
@@ -83,15 +79,6 @@ class GeminiLiveSession:
         if not self._is_active or not self.session:
             return
 
-        if not self._activity_open:
-            try:
-                await self.session.send_realtime_input(
-                    activity_start=types.ActivityStart()
-                )
-                self._activity_open = True
-            except Exception as e:
-                logger.warning(f"activity_start send failed: {e}")
-
         self._last_audio_time = time.monotonic()
         self._audio_started = True
         await self.session.send_realtime_input(
@@ -102,17 +89,9 @@ class GeminiLiveSession:
         if not self._is_active or not self.session:
             return "inactive"
         try:
-            if self._activity_open:
-                await self.session.send_realtime_input(
-                    activity_end=types.ActivityEnd()
-                )
-                self._activity_open = False
-                self._audio_started = False
-                return "activity_end"
-            else:
-                await self.session.send_client_content(turns=None, turn_complete=True)
-                self._audio_started = False
-                return "client_turn_complete"
+            await self.session.send_client_content(turns=None, turn_complete=True)
+            self._audio_started = False
+            return "client_turn_complete"
         except Exception as e:
             logger.warning(f"turn_complete send failed: {e}")
             return "error"
@@ -160,7 +139,6 @@ class GeminiLiveSession:
 
                     if server_content.interrupted:
                         self._model_speaking = False
-                        self._activity_open = False
                         await self._audio_out_queue.put({"type": "interrupted"})
                         continue
 
@@ -174,16 +152,34 @@ class GeminiLiveSession:
                                 })
                             elif part.text:
                                 self._summary_text += part.text
-                                await self._text_out_queue.put({
+                                await self._audio_out_queue.put({
                                     "type": "text",
                                     "data": part.text,
                                 })
+
+                    # Handle output audio transcription (AI speech → text)
+                    if getattr(server_content, "output_transcription", None):
+                        transcript = server_content.output_transcription
+                        if hasattr(transcript, "text") and transcript.text:
+                            self._summary_text += transcript.text
+                            await self._audio_out_queue.put({
+                                "type": "text",
+                                "data": transcript.text,
+                            })
+
+                    # Handle input audio transcription (user speech → text)
+                    if getattr(server_content, "input_transcription", None):
+                        transcript = server_content.input_transcription
+                        if hasattr(transcript, "text") and transcript.text:
+                            await self._audio_out_queue.put({
+                                "type": "user_transcript",
+                                "data": transcript.text,
+                            })
 
                     if server_content.turn_complete:
                         self._model_speaking = False
                         # Reset silence tracker so we wait for new user speech
                         self._audio_started = False
-                        self._activity_open = False
                         await self._audio_out_queue.put({"type": "turn_complete"})
 
                 if not got_message:
@@ -201,6 +197,22 @@ class GeminiLiveSession:
 
     async def get_next_output(self):
         return await self._audio_out_queue.get()
+
+    async def send_wrap_up(self):
+        """Ask the model to wrap up the interview gracefully."""
+        if self.session and self._is_active:
+            await self.session.send_client_content(
+                turns=[
+                    types.Content(
+                        role="user",
+                        parts=[types.Part(
+                            text="TIME_WARNING: We have 1 minute left. Please wrap up with "
+                                 "a brief summary and closing remarks."
+                        )]
+                    )
+                ],
+                turn_complete=True,
+            )
 
     async def end_interview(self) -> str:
         if self.session and self._is_active:

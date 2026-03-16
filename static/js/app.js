@@ -4,6 +4,10 @@ const appState = {
     systemPrompt: null,
     extractedSkills: null,
     sessionId: null,
+    interviewConfig: null,
+    interviewDbId: null,
+    shareToken: null,
+    candidateId: typeof getCandidateId === 'function' ? getCandidateId() : null,
 };
 
 let interviewWS = null;
@@ -20,13 +24,21 @@ function enterApp() {
         app.classList.remove('hidden');
         app.style.opacity = '0';
         app.style.transform = 'translateY(20px)';
-        // Trigger reflow then animate in
         requestAnimationFrame(() => {
             app.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
             app.style.opacity = '1';
             app.style.transform = 'translateY(0)';
         });
         window.scrollTo(0, 0);
+
+        // Show app nav
+        const nav = document.getElementById('app-nav');
+        if (nav) nav.classList.remove('hidden');
+
+        // Prefill resume from profile
+        if (typeof prefillResumeFromProfile === 'function') {
+            prefillResumeFromProfile();
+        }
     }, 400);
 }
 
@@ -78,19 +90,41 @@ function initSmoothScroll() {
 document.addEventListener('DOMContentLoaded', () => {
     initScrollReveal();
     initSmoothScroll();
+
+    // Initialize candidate ID
+    if (typeof getCandidateId === 'function') {
+        appState.candidateId = getCandidateId();
+    }
 });
 
 // ---- App section management ----
 
 function showSection(name) {
-    document.querySelectorAll('#app-page section').forEach(s => {
+    document.querySelectorAll('#app-page main > section').forEach(s => {
         s.classList.remove('active');
         s.classList.add('hidden');
     });
     const section = document.getElementById(`${name}-section`);
-    section.classList.remove('hidden');
-    section.classList.add('active');
+    if (section) {
+        section.classList.remove('hidden');
+        section.classList.add('active');
+    }
     appState.currentSection = name;
+
+    // Update nav active state
+    document.querySelectorAll('#app-nav button').forEach(btn => {
+        btn.classList.remove('nav-active');
+        if (btn.dataset.nav === name) btn.classList.add('nav-active');
+    });
+
+    // Lazy load data for sections
+    if (name === 'history' && typeof loadHistory === 'function') {
+        loadHistory();
+    } else if (name === 'analytics' && typeof loadAnalytics === 'function') {
+        loadAnalytics();
+    } else if (name === 'profile' && typeof loadProfile === 'function') {
+        loadProfile();
+    }
 }
 
 async function startInterview() {
@@ -99,9 +133,22 @@ async function startInterview() {
         return;
     }
 
+    const config = typeof getInterviewConfig === 'function' ? getInterviewConfig() : {};
+    appState.interviewConfig = config;
+
     showSection('interview');
     resetLogPanel();
     addLogEntry('Initializing interview session...', 'info');
+
+    // Start timer
+    if (typeof initTimer === 'function') {
+        initTimer(config.duration_minutes || 30);
+    }
+
+    // Show confidence UI
+    if (typeof showConfidenceUI === 'function') {
+        showConfidenceUI();
+    }
 
     interviewWS = new InterviewWebSocket();
 
@@ -112,9 +159,22 @@ async function startInterview() {
         indicator.className = 'active';
         showToast('Interview started — Wayne is ready', 'success');
         addLogEntry('Gemini Live session active — streaming media', 'info');
+
+        // Track event
+        if (typeof API !== 'undefined') {
+            API.trackEvent('interview_started', {
+                session_id: sessionId,
+                interview_type: config.interview_type,
+            });
+        }
     };
 
     interviewWS.onInterviewEnded = (msg) => {
+        if (typeof stopTimer === 'function') stopTimer();
+        if (typeof stopRecording === 'function') stopRecording();
+        if (typeof stopScreenShare === 'function') stopScreenShare();
+        if (typeof hideConfidenceUI === 'function') hideConfidenceUI();
+
         showToast('Interview complete — generating report...', 'info');
         fetchAndDisplayReport(
             msg.session_id,
@@ -129,7 +189,10 @@ async function startInterview() {
         indicator.className = 'error';
     };
 
-    interviewWS.connect(appState.systemPrompt);
+    interviewWS.connect(appState.systemPrompt, {
+        interview_db_id: appState.interviewDbId,
+        duration_minutes: config.duration_minutes || 30,
+    });
 }
 
 function endInterview() {
@@ -162,6 +225,35 @@ function toggleMic() {
         label.textContent = 'Mute';
         showToast('Microphone unmuted', 'success', 2000);
         addLogEntry('Microphone UNMUTED by user', 'info');
+    }
+}
+
+// ---- Print to PDF ----
+
+function printReport() {
+    window.print();
+}
+
+function downloadCoachingPlan() {
+    const planEl = document.querySelector('.coaching-plan');
+    if (!planEl) {
+        showToast('No coaching plan available', 'warning');
+        return;
+    }
+    const text = planEl.innerText;
+    const blob = new Blob([text], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `coaching-plan-${Date.now()}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+function showTranscriptView(sessionId) {
+    if (typeof loadTranscriptView === 'function') {
+        showSection('history');
+        // Find the interview by session ID and load it
     }
 }
 
