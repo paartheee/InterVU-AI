@@ -186,22 +186,43 @@ docker run -p 8080:8080 \
 
 ## Deploy to Google Cloud Run
 
-### 1. Authenticate with Google Cloud
+### Automated Deployment (Recommended)
+
+A single script handles everything — enables APIs, creates the GCS bucket, builds the container, and deploys to Cloud Run:
+
+```bash
+gcloud auth login
+./deploy.sh
+```
+
+You can customize the deployment via environment variables:
+
+```bash
+GCP_PROJECT_ID=my-project GCP_REGION=us-east1 ./deploy.sh
+```
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `GCP_PROJECT_ID` | `geminiliveagentchallenge` | Google Cloud project ID |
+| `GCP_REGION` | `us-central1` | Cloud Run region |
+| `CLOUD_RUN_SERVICE` | `interai` | Cloud Run service name |
+| `CLOUD_RUN_MEMORY` | `512Mi` | Memory allocation |
+| `CLOUD_RUN_TIMEOUT` | `300` | Request timeout (seconds) |
+| `GCS_BUCKET_NAME` | `interai-reports` | GCS bucket for reports |
+
+### Manual Deployment
 
 ```bash
 gcloud auth login
 gcloud config set project YOUR_PROJECT_ID
-```
 
-### 2. Build and push the container
+# Enable APIs
+gcloud services enable run.googleapis.com cloudbuild.googleapis.com artifactregistry.googleapis.com storage.googleapis.com
 
-```bash
+# Build container
 gcloud builds submit --tag gcr.io/YOUR_PROJECT_ID/interai
-```
 
-### 3. Deploy to Cloud Run
-
-```bash
+# Deploy
 gcloud run deploy interai \
   --image gcr.io/YOUR_PROJECT_ID/interai \
   --platform managed \
@@ -210,11 +231,8 @@ gcloud run deploy interai \
   --set-env-vars "GOOGLE_API_KEY=your-gemini-api-key,GCS_ENABLED=true,GCS_BUCKET_NAME=interai-reports" \
   --memory 512Mi \
   --timeout 300
-```
 
-### 4. (Optional) Create a GCS bucket for reports
-
-```bash
+# (Optional) Create GCS bucket
 gsutil mb -l us-central1 gs://interai-reports
 ```
 
