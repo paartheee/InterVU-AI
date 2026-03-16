@@ -219,11 +219,17 @@ class InterviewWebSocket {
     }
 
     _handleInterviewEnded(msg) {
+        console.log('[WS] _handleInterviewEnded called', msg);
         this._intentionalClose = true;
-        this.mediaCapture.stop();
-        this.audioPlayer.stop();
-        if (this.ws) this.ws.close();
-        if (this.onInterviewEnded) this.onInterviewEnded(msg);
+        try { this.mediaCapture.stop(); } catch(e) { console.error('[WS] mediaCapture.stop error:', e); }
+        try { this.audioPlayer.stop(); } catch(e) { console.error('[WS] audioPlayer.stop error:', e); }
+        try { if (this.ws) this.ws.close(); } catch(e) { console.error('[WS] ws.close error:', e); }
+        console.log('[WS] calling onInterviewEnded callback');
+        if (this.onInterviewEnded) {
+            try { this.onInterviewEnded(msg); } catch(e) { console.error('[WS] onInterviewEnded error:', e); }
+        } else {
+            console.warn('[WS] onInterviewEnded callback not set!');
+        }
     }
 
     disconnect() {

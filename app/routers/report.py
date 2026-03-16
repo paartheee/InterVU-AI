@@ -1,3 +1,4 @@
+import asyncio
 import secrets
 
 from fastapi import APIRouter, HTTPException, Depends
@@ -17,21 +18,24 @@ router = APIRouter()
 async def create_report(request: ReportRequest, db: AsyncSession = Depends(get_db)):
     try:
         skills = ExtractedSkills.model_validate_json(request.skills_json)
-        report = await generate_report(
-            session_id=request.session_id,
-            summary_text=request.summary_text,
-            skills=skills,
+
+        # Run report and skill scores in parallel — they're independent
+        report, skill_scores = await asyncio.gather(
+            generate_report(
+                session_id=request.session_id,
+                summary_text=request.summary_text,
+                skills=skills,
+            ),
+            generate_skill_scores(request.summary_text, skills),
         )
 
-        # Generate enhanced report components
-        skill_scores = await generate_skill_scores(request.summary_text, skills)
-        coaching_plan = await generate_coaching_plan(report, skill_scores)
+        # Coaching plan and file save are independent — run in parallel
         share_token = secrets.token_urlsafe(16)
+        coaching_plan, location = await asyncio.gather(
+            generate_coaching_plan(report, skill_scores),
+            save_report(report),
+        )
 
-        # Save to file (backward compat)
-        location = await save_report(report)
-
-        # Save to DB
         interview_db_id = getattr(request, 'interview_db_id', None)
         await save_report_to_db(
             db, report, skill_scores, coaching_plan,

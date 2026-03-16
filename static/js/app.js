@@ -11,6 +11,8 @@ const appState = {
 };
 
 let interviewWS = null;
+let endFallbackTimer = null;
+let reportAlreadyTriggered = false;
 
 // ---- Landing / App page transition ----
 
@@ -133,6 +135,10 @@ async function startInterview() {
         return;
     }
 
+    // Reset end-interview state from any previous session
+    reportAlreadyTriggered = false;
+    if (endFallbackTimer) { clearTimeout(endFallbackTimer); endFallbackTimer = null; }
+
     const config = typeof getInterviewConfig === 'function' ? getInterviewConfig() : {};
     appState.interviewConfig = config;
 
@@ -170,6 +176,10 @@ async function startInterview() {
     };
 
     interviewWS.onInterviewEnded = (msg) => {
+        console.log('[App] onInterviewEnded fired', msg);
+        reportAlreadyTriggered = true;
+        if (endFallbackTimer) clearTimeout(endFallbackTimer);
+
         if (typeof stopTimer === 'function') stopTimer();
         if (typeof stopRecording === 'function') stopRecording();
         if (typeof stopScreenShare === 'function') stopScreenShare();
@@ -213,7 +223,21 @@ function endInterview() {
             </div>
         `;
 
+        reportAlreadyTriggered = false;
         interviewWS.sendEnd();
+
+        // Fallback: if interview_ended WS message is lost, trigger report after 10s
+        endFallbackTimer = setTimeout(() => {
+            if (!reportAlreadyTriggered) {
+                console.warn('[App] interview_ended not received within 10s — triggering report via fallback');
+                reportAlreadyTriggered = true;
+                fetchAndDisplayReport(
+                    appState.sessionId,
+                    '',
+                    JSON.stringify(appState.extractedSkills)
+                );
+            }
+        }, 10000);
     }
 }
 

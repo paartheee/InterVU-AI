@@ -291,21 +291,12 @@ class GeminiLiveSession:
         if self.session and self._is_active:
             try:
                 if self._is_native_audio:
-                    # Send END signal via realtime input and wait briefly for
-                    # any final transcription chunks (max 5s)
+                    # For native audio, just signal the end — no need to wait
+                    # for a response. The accumulated transcription is the summary.
                     await self.session.send_realtime_input(
                         text="The interview has now ended. Thank the candidate and say goodbye."
                     )
-                    try:
-                        deadline = asyncio.get_event_loop().time() + 5
-                        while asyncio.get_event_loop().time() < deadline:
-                            msg = await asyncio.wait_for(
-                                self._audio_out_queue.get(), timeout=2
-                            )
-                            if msg["type"] in ("turn_complete", "error"):
-                                break
-                    except asyncio.TimeoutError:
-                        pass
+                    logger.info("[END] Native audio end signal sent, returning accumulated summary (%d chars)", len(self._summary_text))
                 else:
                     await self.session.send_client_content(
                         turns=[
@@ -333,7 +324,11 @@ class GeminiLiveSession:
             except Exception as e:
                 logger.warning(f"[END] Error during end_interview: {e}")
 
+        # Put sentinel BEFORE setting inactive so forward_to_browser() can
+        # pick it up and send interview_ended to the client in order.
+        await self._audio_out_queue.put({"type": "interview_ended", "data": self._summary_text})
         self._is_active = False
+        logger.info("[END] interview_ended sentinel queued, _is_active=False")
         return self._summary_text
 
     async def close(self):

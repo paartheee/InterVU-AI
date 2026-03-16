@@ -119,7 +119,7 @@ async function fetchAndDisplayReport(sessionId, summaryText, skillsJson) {
             document.body.appendChild(modalDiv);
         }
 
-        // Track event
+        if (typeof API !== 'undefined') {
             API.trackEvent('interview_completed', {
                 session_id: sessionId,
                 overall_score: r.overall_score,

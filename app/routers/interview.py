@@ -99,12 +99,8 @@ async def interview_websocket(websocket: WebSocket):
                     # Wait a bit for wrap-up then auto-end
                     await asyncio.sleep(60)
                     if gemini_session._is_active:
-                        summary = await gemini_session.end_interview()
-                        await _safe_send(websocket, {
-                            "type": "interview_ended",
-                            "session_id": gemini_session.session_id,
-                            "summary": summary,
-                        })
+                        await gemini_session.end_interview()
+                        logger.info("[TIMER] end_interview done — sentinel queued")
                     return
 
                 await _safe_send(websocket, {
@@ -185,13 +181,8 @@ async def interview_websocket(websocket: WebSocket):
                             "[GEMINI] End signal received — audio=%d video=%d",
                             audio_chunks_received, video_frames_received,
                         )
-                        summary = await gemini_session.end_interview()
-                        logger.info("[GEMINI] end_interview done — summary length=%d", len(summary))
-                        await _safe_send(websocket, {
-                            "type": "interview_ended",
-                            "session_id": gemini_session.session_id,
-                            "summary": summary,
-                        })
+                        await gemini_session.end_interview()
+                        logger.info("[GEMINI] end_interview done — sentinel queued, forward_to_browser will send interview_ended")
                         return
 
             logger.info("[GEMINI] forward_to_gemini exited")
@@ -199,7 +190,10 @@ async def interview_websocket(websocket: WebSocket):
         async def forward_to_browser():
             logger.info("[BROWSER] forward_to_browser started")
             loop_count = 0
-            while gemini_session._is_active and _ws_open(websocket):
+            # Only check WebSocket state in loop condition; _is_active is checked
+            # inside the timeout handler so the "interview_ended" sentinel (queued
+            # by end_interview() before _is_active is cleared) still gets processed.
+            while _ws_open(websocket):
                 try:
                     output = await asyncio.wait_for(
                         gemini_session.get_next_output(), timeout=1.0
@@ -211,6 +205,10 @@ async def interview_websocket(websocket: WebSocket):
                             "[BROWSER] still waiting — is_active=%s ws_open=%s loops=%d",
                             gemini_session._is_active, _ws_open(websocket), loop_count,
                         )
+                    if not gemini_session._is_active:
+                        # Session ended and no sentinel arrived — exit cleanly
+                        logger.info("[BROWSER] session inactive with empty queue — exiting")
+                        break
                     continue
 
                 if not _ws_open(websocket):
@@ -267,6 +265,15 @@ async def interview_websocket(websocket: WebSocket):
                         "type": "user_transcript",
                         "data": output["data"],
                     })
+                elif msg_type == "interview_ended":
+                    # Sentinel placed by end_interview() — send to client and exit
+                    logger.info("[BROWSER] interview_ended sentinel — forwarding to client")
+                    await _safe_send(websocket, {
+                        "type": "interview_ended",
+                        "session_id": gemini_session.session_id,
+                        "summary": output["data"],
+                    })
+                    return
                 elif msg_type == "error":
                     logger.error("[BROWSER] error output from Gemini: %s", output["data"])
                     await _safe_send(websocket, {
