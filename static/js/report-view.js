@@ -1,7 +1,13 @@
 async function fetchAndDisplayReport(sessionId, summaryText, skillsJson) {
     showSection('report');
     const container = document.getElementById('report-content');
-    container.innerHTML = '<p>Generating your interview report...</p>';
+    container.innerHTML = `
+        <div class="report-loading">
+            <div class="report-spinner"></div>
+            <h3>Interview Report</h3>
+            <p>Generating your interview report...</p>
+        </div>
+    `;
 
     try {
         const response = await fetch('/api/report', {
@@ -86,10 +92,18 @@ async function fetchAndDisplayReport(sessionId, summaryText, skillsJson) {
             </div>
         `;
 
-        // Coaching plan modal (hidden by default)
+        container.innerHTML = html;
+
+        // Coaching plan modal: append to body so it's never clipped by parent containers
         if (data.coaching_plan) {
-            html += `
-            <div id="coaching-modal" class="coaching-modal hidden">
+            // Remove any existing coaching modal
+            const existing = document.getElementById('coaching-modal');
+            if (existing) existing.remove();
+
+            const modalDiv = document.createElement('div');
+            modalDiv.id = 'coaching-modal';
+            modalDiv.className = 'coaching-modal hidden';
+            modalDiv.innerHTML = `
                 <div class="coaching-modal-backdrop" onclick="closeCoachingPlan()"></div>
                 <div class="coaching-modal-content">
                     <div class="coaching-modal-header">
@@ -101,14 +115,11 @@ async function fetchAndDisplayReport(sessionId, summaryText, skillsJson) {
                     </div>
                     <div class="coaching-plan">${data.coaching_plan.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')}</div>
                 </div>
-            </div>
             `;
+            document.body.appendChild(modalDiv);
         }
 
-        container.innerHTML = html;
-
         // Track event
-        if (typeof API !== 'undefined') {
             API.trackEvent('interview_completed', {
                 session_id: sessionId,
                 overall_score: r.overall_score,

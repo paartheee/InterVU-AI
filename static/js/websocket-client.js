@@ -61,6 +61,9 @@ class InterviewWebSocket {
                     const pcmBytes = Uint8Array.from(
                         atob(msg.data), c => c.charCodeAt(0)
                     );
+                    if (!this._modelAudioCount) this._modelAudioCount = 0;
+                    this._modelAudioCount++;
+                    if (this._modelAudioCount === 1) console.log('[WS] first model audio chunk received');
                     this.mediaCapture.setModelSpeaking(true);
                     this.audioPlayer.enqueue(pcmBytes);
                     updateStat('responses');
@@ -75,6 +78,8 @@ class InterviewWebSocket {
                     break;
 
                 case 'turn_complete':
+                    console.log('[WS] model turn_complete received');
+                    this._modelAudioCount = 0;
                     this.mediaCapture.setModelSpeaking(false);
                     addLogEntry('AI turn complete', 'ai');
                     if (typeof finalizeWayneBubble === 'function') finalizeWayneBubble();
@@ -172,8 +177,7 @@ class InterviewWebSocket {
         this.mediaCapture.onSpeechEnd = () => {
             if (this.ws && this.ws.readyState === WebSocket.OPEN) {
                 if (this._nativeAudio) {
-                    // Native-audio: model handles turn-taking via its own VAD.
-                    // Don't lock input or stop streaming — just log it.
+                    console.log('[WS] onSpeechEnd (native-audio: model handles turns)');
                     addLogEntry('User speech pause detected (native-audio: model handles turns)', 'info');
                     return;
                 }

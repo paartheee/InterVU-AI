@@ -25,11 +25,16 @@ class MediaCapture {
     /** Enable native-audio mode: stream all audio continuously, let model VAD handle turns */
     setNativeAudioMode(enabled) {
         this._nativeAudioMode = enabled;
+        console.log('[MediaCapture] native-audio mode:', enabled);
     }
 
     /** Call when AI starts sending audio */
     setModelSpeaking(speaking) {
+        const wasAlready = this._modelSpeaking === speaking;
         this._modelSpeaking = speaking;
+        if (!wasAlready) {
+            console.log('[MediaCapture] model speaking:', speaking);
+        }
         if (speaking) {
             this._inputLockUntil = 0;
             this._awaitingModelResponse = false;
@@ -37,8 +42,10 @@ class MediaCapture {
             this._isUserSpeaking = false;
             return;
         }
-        // After model stops, add 500ms cooldown for echo to fade
-        this._echoCooldownUntil = performance.now() + 500;
+        // After model stops, add cooldown for echo to fade
+        // Use longer cooldown for native-audio mode since all audio is streamed to the model
+        const cooldownMs = this._nativeAudioMode ? 1500 : 500;
+        this._echoCooldownUntil = performance.now() + cooldownMs;
     }
 
     lockInput(ms = 1500) {
@@ -88,10 +95,24 @@ class MediaCapture {
 
             const float32 = event.inputBuffer.getChannelData(0);
 
-            // Native-audio mode: stream ALL audio continuously to Gemini.
-            // The model's own VAD handles turn detection — we only skip
-            // if explicitly muted.
+            // Native-audio mode: stream audio continuously BUT suppress during
+            // model speech and echo cooldown to prevent the model hearing itself.
             if (this._nativeAudioMode) {
+                if (this._modelSpeaking) {
+                    if (!this._suppressedLog) {
+                        console.log('[MediaCapture] suppressing mic — model speaking');
+                        this._suppressedLog = true;
+                    }
+                    return;
+                }
+                if (performance.now() < this._echoCooldownUntil) {
+                    return;
+                }
+                this._suppressedLog = false;
+                if (!this._nativeChunkCount) this._nativeChunkCount = 0;
+                this._nativeChunkCount++;
+                if (this._nativeChunkCount === 1) console.log('[MediaCapture] sending first native-audio chunk');
+                if (this._nativeChunkCount % 100 === 0) console.log('[MediaCapture] native-audio chunks sent:', this._nativeChunkCount);
                 const int16 = new Int16Array(float32.length);
                 for (let i = 0; i < float32.length; i++) {
                     int16[i] = Math.max(-32768, Math.min(32767, Math.round(float32[i] * 32767)));

@@ -90,8 +90,15 @@ class GeminiLiveSession:
         logger.info(f"[CONNECT] Receive loop and silence watchdog started")
 
         # Nudge the model to start the interview immediately
-        logger.info("[CONNECT] Sending text nudge to trigger first question...")
-        try:
+        logger.info("[CONNECT] Sending initial nudge to trigger first question...")
+        if self._is_native_audio:
+            # For native-audio models, use send_realtime_input with text
+            # (send_client_content may not be supported)
+            await self.session.send_realtime_input(
+                text="The interview session has started. The candidate is ready and waiting. Please introduce yourself as Wayne and begin the interview now."
+            )
+            logger.info("[CONNECT] Text nudge sent via send_realtime_input")
+        else:
             await self.session.send_client_content(
                 turns=[
                     types.Content(
@@ -103,23 +110,16 @@ class GeminiLiveSession:
                 ],
                 turn_complete=True,
             )
-            logger.info("[CONNECT] Text nudge sent successfully — waiting for model response")
-        except Exception as e:
-            logger.warning(f"[CONNECT] Text nudge failed ({e}), falling back to silence chunks")
-            # Fallback: send silence chunks to trigger the model
-            silence = b"\x00\x00" * 16000  # 1s of silence at 16kHz 16-bit mono
-            for i in range(3):
-                await self.session.send_realtime_input(
-                    audio=types.Blob(data=silence, mime_type="audio/pcm;rate=16000")
-                )
-                await asyncio.sleep(0.1)
-            logger.info("[CONNECT] Sent 3s of silence as fallback nudge")
+            logger.info("[CONNECT] Text nudge sent via send_client_content")
 
     async def send_audio(self, audio_bytes: bytes):
         if not self._is_active or not self.session:
             return
 
-        self._last_audio_time = time.monotonic()
+        now = time.monotonic()
+        if not self._audio_started:
+            logger.info("[AUDIO] First user audio chunk received — starting turn tracking")
+        self._last_audio_time = now
         self._audio_started = True
         await self.session.send_realtime_input(
             audio=types.Blob(data=audio_bytes, mime_type="audio/pcm;rate=16000")
@@ -129,9 +129,18 @@ class GeminiLiveSession:
         if not self._is_active or not self.session:
             return "inactive"
         if self._is_native_audio:
-            # Native-audio models handle turn-taking automatically
-            self._audio_started = False
-            return "native_audio_auto"
+            # Native-audio models handle turn-taking via their own VAD,
+            # but send a text nudge as a fallback to prompt the model to respond.
+            try:
+                await self.session.send_realtime_input(
+                    text="The candidate has paused. Please continue the interview with your next question or follow-up."
+                )
+                self._audio_started = False
+                return "native_audio_nudge"
+            except Exception as e:
+                logger.warning(f"Native audio nudge failed: {e}")
+                self._audio_started = False
+                return "native_audio_auto"
         try:
             await self.session.send_client_content(turns=None, turn_complete=True)
             self._audio_started = False
@@ -150,12 +159,16 @@ class GeminiLiveSession:
         )
 
     async def _silence_watchdog(self):
-        """Fallback silence detector if client speech-end signal is missed."""
+        """Fallback silence detector — after SILENCE_TIMEOUT with no audio, nudge the model."""
+        logger.info("[WATCHDOG] Silence watchdog started (timeout=%.1fs)", SILENCE_TIMEOUT)
         try:
             while self._is_active:
                 await asyncio.sleep(1.0)
 
-                if not self._audio_started or not self._is_active:
+                if not self._is_active:
+                    break
+
+                if not self._audio_started:
                     continue
 
                 if self._model_speaking:
@@ -165,30 +178,30 @@ class GeminiLiveSession:
                 if elapsed >= SILENCE_TIMEOUT and self.session:
                     mode = await self.send_turn_complete()
                     logger.info(
-                        f"Silence detected ({elapsed:.1f}s) — sent turn_complete via {mode}"
+                        "[WATCHDOG] Silence %.1fs detected — nudged model (mode=%s)",
+                        elapsed, mode,
                     )
         except asyncio.CancelledError:
             pass
         except Exception as e:
-            logger.error(f"Silence watchdog error: {e}")
+            logger.error("[WATCHDOG] Error: %s", e)
 
     async def _receive_loop(self):
         logger.info("[RECEIVE] Receive loop started, waiting for Gemini messages...")
         msg_count = 0
+        turn_count = 0
         try:
             while self._is_active and self.session:
-                got_message = False
-
+                # session.receive() yields all messages for ONE model turn,
+                # then the generator exhausts. Loop to receive the next turn.
                 async for msg in self.session.receive():
-                    got_message = True
+                    if not self._is_active:
+                        break
+
                     msg_count += 1
                     server_content = msg.server_content
                     if server_content is None:
-                        logger.info(
-                            "[RECEIVE] msg #%d: non-server_content — type=%s, keys=%s",
-                            msg_count, type(msg).__name__,
-                            [k for k in dir(msg) if not k.startswith('_')]
-                        )
+                        logger.info("[RECEIVE] msg #%d: non-server_content type=%s", msg_count, type(msg).__name__)
                         continue
 
                     if server_content.interrupted:
@@ -214,43 +227,35 @@ class GeminiLiveSession:
                                     "type": "text",
                                     "data": part.text,
                                 })
-                        logger.info(
-                            "[RECEIVE] msg #%d: model_turn — parts=[%s]",
-                            msg_count, ", ".join(parts_summary)
-                        )
+                        if parts_summary:
+                            logger.info("[RECEIVE] msg #%d: model_turn — parts=[%s]", msg_count, ", ".join(parts_summary))
 
-                    # Handle output audio transcription (AI speech → text)
+                    # Output transcription (AI speech → text)
                     if getattr(server_content, "output_transcription", None):
-                        transcript = server_content.output_transcription
-                        if hasattr(transcript, "text") and transcript.text:
-                            self._summary_text += transcript.text
-                            await self._audio_out_queue.put({
-                                "type": "text",
-                                "data": transcript.text,
-                            })
+                        t = server_content.output_transcription
+                        if getattr(t, "text", None):
+                            self._summary_text += t.text
+                            await self._audio_out_queue.put({"type": "text", "data": t.text})
 
-                    # Handle input audio transcription (user speech → text)
+                    # Input transcription (user speech → text)
                     if getattr(server_content, "input_transcription", None):
-                        transcript = server_content.input_transcription
-                        if hasattr(transcript, "text") and transcript.text:
-                            await self._audio_out_queue.put({
-                                "type": "user_transcript",
-                                "data": transcript.text,
-                            })
+                        t = server_content.input_transcription
+                        if getattr(t, "text", None):
+                            await self._audio_out_queue.put({"type": "user_transcript", "data": t.text})
 
                     if server_content.turn_complete:
-                        logger.info("[RECEIVE] msg #%d: TURN COMPLETE — model done speaking", msg_count)
+                        turn_count += 1
+                        logger.info("[RECEIVE] msg #%d: TURN COMPLETE (turn #%d) — looping for next turn", msg_count, turn_count)
                         self._model_speaking = False
-                        # Reset silence tracker so we wait for new user speech
                         self._audio_started = False
                         await self._audio_out_queue.put({"type": "turn_complete"})
+                        # Break inner loop — outer while will call session.receive() again
+                        break
 
-                if not got_message:
-                    logger.info(
-                        "[RECEIVE] Stream ended with no messages for session %s (total msgs: %d)",
-                        self.session_id, msg_count,
-                    )
+                if not self._is_active:
                     break
+
+            logger.info("[RECEIVE] Receive loop exited — turns=%d msgs=%d", turn_count, msg_count)
 
         except Exception as e:
             logger.error(f"[RECEIVE] Receive loop error after {msg_count} messages: {e}", exc_info=True)
@@ -284,40 +289,55 @@ class GeminiLiveSession:
 
     async def end_interview(self) -> str:
         if self.session and self._is_active:
-            if not self._is_native_audio:
-                await self.session.send_client_content(
-                    turns=[
-                        types.Content(
-                            role="user",
-                            parts=[types.Part(
-                                text="END_INTERVIEW. Please provide your comprehensive "
-                                     "text summary of this interview now."
-                            )]
-                        )
-                    ],
-                    turn_complete=True,
-                )
-                # Wait for summary text (30s timeout)
-                try:
-                    deadline = asyncio.get_event_loop().time() + 30
-                    while asyncio.get_event_loop().time() < deadline:
-                        msg = await asyncio.wait_for(
-                            self._audio_out_queue.get(), timeout=5
-                        )
-                        if msg["type"] == "text":
-                            pass  # text is accumulated in _receive_loop
-                        elif msg["type"] == "turn_complete":
-                            break
-                        elif msg["type"] == "error":
-                            break
-                except asyncio.TimeoutError:
-                    pass
+            try:
+                if self._is_native_audio:
+                    # Send END signal via realtime input and wait briefly for
+                    # any final transcription chunks (max 5s)
+                    await self.session.send_realtime_input(
+                        text="The interview has now ended. Thank the candidate and say goodbye."
+                    )
+                    try:
+                        deadline = asyncio.get_event_loop().time() + 5
+                        while asyncio.get_event_loop().time() < deadline:
+                            msg = await asyncio.wait_for(
+                                self._audio_out_queue.get(), timeout=2
+                            )
+                            if msg["type"] in ("turn_complete", "error"):
+                                break
+                    except asyncio.TimeoutError:
+                        pass
+                else:
+                    await self.session.send_client_content(
+                        turns=[
+                            types.Content(
+                                role="user",
+                                parts=[types.Part(
+                                    text="END_INTERVIEW. Please provide your comprehensive "
+                                         "text summary of this interview now."
+                                )]
+                            )
+                        ],
+                        turn_complete=True,
+                    )
+                    # Wait for summary text (30s timeout)
+                    try:
+                        deadline = asyncio.get_event_loop().time() + 30
+                        while asyncio.get_event_loop().time() < deadline:
+                            msg = await asyncio.wait_for(
+                                self._audio_out_queue.get(), timeout=5
+                            )
+                            if msg["type"] in ("turn_complete", "error"):
+                                break
+                    except asyncio.TimeoutError:
+                        pass
+            except Exception as e:
+                logger.warning(f"[END] Error during end_interview: {e}")
 
+        self._is_active = False
         return self._summary_text
 
     async def close(self):
         self._is_active = False
-        self._activity_open = False
         if self._silence_task:
             self._silence_task.cancel()
             try:
@@ -331,7 +351,12 @@ class GeminiLiveSession:
             except asyncio.CancelledError:
                 pass
         if self._ctx:
-            await self._ctx.__aexit__(None, None, None)
+            try:
+                await asyncio.wait_for(
+                    self._ctx.__aexit__(None, None, None), timeout=5.0
+                )
+            except (asyncio.TimeoutError, Exception):
+                pass
             self._ctx = None
             self.session = None
         logger.info(f"Gemini Live session {self.session_id} closed")

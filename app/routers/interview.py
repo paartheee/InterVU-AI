@@ -123,31 +123,37 @@ async def interview_websocket(websocket: WebSocket):
 
         async def forward_to_gemini():
             nonlocal audio_chunks_received, video_frames_received
+            logger.info("[GEMINI] forward_to_gemini started")
 
             while True:
                 msg = await websocket.receive()
 
                 if msg.get("type") == "websocket.disconnect":
+                    logger.info("[GEMINI] websocket.disconnect received — exiting")
                     break
 
                 if "text" in msg:
                     data = json.loads(msg["text"])
+                    msg_type = data["type"]
 
-                    if data["type"] == "audio":
+                    if msg_type == "audio":
                         audio_bytes = base64.b64decode(data["data"])
                         await gemini_session.send_audio(audio_bytes)
                         audio_chunks_received += 1
 
-                        if audio_chunks_received % 20 == 0:
+                        if audio_chunks_received == 1:
+                            logger.info("[GEMINI] First audio chunk received from browser")
+                        if audio_chunks_received % 50 == 0:
+                            logger.info("[GEMINI] Audio chunks: %d", audio_chunks_received)
                             await _safe_send(websocket, {
                                 "type": "log",
                                 "level": "audio",
                                 "data": f"Backend processed {audio_chunks_received} audio chunks ({len(audio_bytes)} bytes/chunk)",
                             })
 
-                    elif data["type"] == "turn_complete":
+                    elif msg_type == "turn_complete":
                         mode = await gemini_session.send_turn_complete()
-                        # Log user turn in transcript
+                        logger.info("[GEMINI] turn_complete from client — mode=%s", mode)
                         transcript_buffer.append({
                             "speaker": "user",
                             "content": "[turn complete]",
@@ -160,18 +166,12 @@ async def interview_websocket(websocket: WebSocket):
                             "data": f"Client signaled user turn complete ({mode})",
                         })
 
-                    elif data["type"] == "video":
+                    elif msg_type == "video":
                         jpeg_bytes = base64.b64decode(data["data"])
                         await gemini_session.send_video_frame(jpeg_bytes)
                         video_frames_received += 1
 
-                        await _safe_send(websocket, {
-                            "type": "log",
-                            "level": "video",
-                            "data": f"Frame #{video_frames_received} sent to Gemini ({len(jpeg_bytes)} bytes JPEG)",
-                        })
-
-                    elif data["type"] == "confidence_sample":
+                    elif msg_type == "confidence_sample":
                         confidence_buffer.append({
                             "timestamp_ms": int((time.time() - interview_start_time) * 1000),
                             "confidence_score": data.get("confidence_score", 50),
@@ -180,13 +180,13 @@ async def interview_websocket(websocket: WebSocket):
                             "noise_level_db": data.get("noise_level_db"),
                         })
 
-                    elif data["type"] == "end":
-                        await _safe_send(websocket, {
-                            "type": "log",
-                            "level": "info",
-                            "data": f"Session stats: {audio_chunks_received} audio chunks, {video_frames_received} video frames processed",
-                        })
+                    elif msg_type == "end":
+                        logger.info(
+                            "[GEMINI] End signal received — audio=%d video=%d",
+                            audio_chunks_received, video_frames_received,
+                        )
                         summary = await gemini_session.end_interview()
+                        logger.info("[GEMINI] end_interview done — summary length=%d", len(summary))
                         await _safe_send(websocket, {
                             "type": "interview_ended",
                             "session_id": gemini_session.session_id,
@@ -194,24 +194,38 @@ async def interview_websocket(websocket: WebSocket):
                         })
                         return
 
+            logger.info("[GEMINI] forward_to_gemini exited")
+
         async def forward_to_browser():
+            logger.info("[BROWSER] forward_to_browser started")
+            loop_count = 0
             while gemini_session._is_active and _ws_open(websocket):
                 try:
                     output = await asyncio.wait_for(
                         gemini_session.get_next_output(), timeout=1.0
                     )
                 except asyncio.TimeoutError:
+                    loop_count += 1
+                    if loop_count % 10 == 0:
+                        logger.info(
+                            "[BROWSER] still waiting — is_active=%s ws_open=%s loops=%d",
+                            gemini_session._is_active, _ws_open(websocket), loop_count,
+                        )
                     continue
 
                 if not _ws_open(websocket):
+                    logger.warning("[BROWSER] WebSocket closed before send")
                     break
 
-                if output["type"] == "audio":
+                msg_type = output.get("type")
+                logger.info("[BROWSER] output received: type=%s", msg_type)
+
+                if msg_type == "audio":
                     await _safe_send(websocket, {
                         "type": "audio",
                         "data": base64.b64encode(output["data"]).decode("ascii"),
                     })
-                elif output["type"] == "interrupted":
+                elif msg_type == "interrupted":
                     await _safe_send(websocket, {"type": "interrupted"})
                     transcript_buffer.append({
                         "speaker": "system",
@@ -222,11 +236,16 @@ async def interview_websocket(websocket: WebSocket):
                     await _safe_send(websocket, {
                         "type": "log",
                         "level": "interrupt",
-                        "data": "Gemini interrupted — detected user activity (speaking/visual cue)",
+                        "data": "Gemini interrupted — detected user activity",
                     })
-                elif output["type"] == "turn_complete":
+                elif msg_type == "turn_complete":
                     await _safe_send(websocket, {"type": "turn_complete"})
-                elif output["type"] == "text":
+                    await _safe_send(websocket, {
+                        "type": "log",
+                        "level": "ai",
+                        "data": "Model turn complete — waiting for user input",
+                    })
+                elif msg_type == "text":
                     transcript_buffer.append({
                         "speaker": "ai",
                         "content": output["data"],
@@ -237,7 +256,7 @@ async def interview_websocket(websocket: WebSocket):
                         "type": "text",
                         "data": output["data"],
                     })
-                elif output["type"] == "user_transcript":
+                elif msg_type == "user_transcript":
                     transcript_buffer.append({
                         "speaker": "user",
                         "content": output["data"],
@@ -248,12 +267,18 @@ async def interview_websocket(websocket: WebSocket):
                         "type": "user_transcript",
                         "data": output["data"],
                     })
-                elif output["type"] == "error":
+                elif msg_type == "error":
+                    logger.error("[BROWSER] error output from Gemini: %s", output["data"])
                     await _safe_send(websocket, {
                         "type": "error",
                         "data": output["data"],
                     })
                     break
+
+            logger.info(
+                "[BROWSER] forward_to_browser exited — is_active=%s ws_open=%s",
+                gemini_session._is_active, _ws_open(websocket),
+            )
 
         await asyncio.gather(
             forward_to_gemini(),

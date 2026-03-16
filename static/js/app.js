@@ -201,6 +201,18 @@ function endInterview() {
         indicator.textContent = 'Ending interview...';
         document.getElementById('end-btn').disabled = true;
         addLogEntry('User clicked End Interview — requesting summary from Gemini', 'info');
+
+        // Show loading screen immediately so there's no black screen while waiting
+        showSection('report');
+        const container = document.getElementById('report-content');
+        container.innerHTML = `
+            <div class="report-loading">
+                <div class="report-spinner"></div>
+                <h3>Ending Interview</h3>
+                <p>Wrapping up and generating your report...</p>
+            </div>
+        `;
+
         interviewWS.sendEnd();
     }
 }
